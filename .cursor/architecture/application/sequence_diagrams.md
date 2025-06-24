@@ -170,11 +170,11 @@ sequenceDiagram
     participant ToolReg as Tool Registry
     participant HealthMon as Health Monitor
 
-    Agent->>+MCPOrch: invoke_tool("get_energy_consumption", params)
-    MCPOrch->>+ToolReg: find_server_for_tool("get_energy_consumption")
+    Agent->>+MCPOrch: invoke_tool(get_energy_consumption, params)
+    MCPOrch->>+ToolReg: find_server_for_tool(get_energy_consumption)
     ToolReg-->>-MCPOrch: primary_server=MCPServer1
     
-    MCPOrch->>+MCPServer1: call_tool("get_energy_consumption", params)
+    MCPOrch->>+MCPServer1: call_tool(get_energy_consumption, params)
     
     alt Server Available
         MCPServer1-->>-MCPOrch: tool_result(energy_data)
@@ -184,10 +184,10 @@ sequenceDiagram
         MCPOrch->>+HealthMon: report_server_failure(MCPServer1)
         HealthMon-->>-MCPOrch: failover_recommendation
         
-        MCPOrch->>+ToolReg: find_backup_server("get_energy_consumption")
+        MCPOrch->>+ToolReg: find_backup_server(get_energy_consumption)
         ToolReg-->>-MCPOrch: backup_server=MCPServer2
         
-        MCPOrch->>+MCPServer2: call_tool("get_energy_consumption", params)
+        MCPOrch->>+MCPServer2: call_tool(get_energy_consumption, params)
         MCPServer2-->>-MCPOrch: tool_result(energy_data)
         MCPOrch-->>-Agent: tool_result(energy_data)
         
@@ -212,26 +212,26 @@ sequenceDiagram
     LLMRouter->>+PrivacyFilter: check_privacy_constraints(query, PRIVATE)
     PrivacyFilter-->>-LLMRouter: privacy_level=LOCAL_ONLY
     
-    alt Privacy Level = LOCAL_ONLY
+    alt Privacy Level LOCAL_ONLY
         LLMRouter->>+LocalOllama: generate(query, model=qwen2.5-7b)
         LocalOllama-->>-LLMRouter: response(text, tokens=150, cost=0)
         LLMRouter-->>-Agent: llm_response(text, provider=local)
         
-    else Privacy Level = ENHANCED
+    else Privacy Level ENHANCED
         LLMRouter->>+CostTracker: check_budget_availability()
-        CostTracker-->>-LLMRouter: remaining_budget=$500
+        CostTracker-->>-LLMRouter: remaining_budget=500USD
         
-        alt Complexity > 0.7 AND Budget Available
+        alt Complexity greater than 0.7 AND Budget Available
             LLMRouter->>LLMRouter: select_optimal_api(complexity, cost, domain)
             
             par API Selection
                 LLMRouter->>+DeepSeek: generate(anonymized_query)
-                DeepSeek-->>-LLMRouter: response(text, tokens=200, cost=$0.03)
+                DeepSeek-->>-LLMRouter: response(text, tokens=200, cost=0.03USD)
             and Fallback Ready
                 Note over LocalOllama: Standby for API failure
             end
             
-            LLMRouter->>+CostTracker: record_usage(DeepSeek, $0.03)
+            LLMRouter->>+CostTracker: record_usage(DeepSeek, 0.03USD)
             CostTracker-->>-LLMRouter: usage_recorded
             
         else Budget Exhausted OR Low Complexity
@@ -262,7 +262,7 @@ sequenceDiagram
     participant Model1 as Llama-3.2-3B
     participant Model2 as Qwen2.5-7B
 
-    Agent->>+LMM: load_model("qwen2.5-7b-instruct", priority=HIGH)
+    Agent->>+LMM: load_model(qwen2.5-7b-instruct, priority=HIGH)
     LMM->>LMM: check_memory_availability(7GB_required)
     
     alt Sufficient Memory
@@ -270,7 +270,7 @@ sequenceDiagram
         OS-->>-LMM: memory_allocated
         LMM->>+Model2: load_model_weights()
         Model2-->>-LMM: model_ready
-        LMM-->>-Agent: LoadedModel(qwen2.5-7b)
+        LMM-->>-Agent: LoadedModel qwen2.5-7b
     else Insufficient Memory
         LMM->>LMM: identify_least_used_model()
         LMM->>+Model1: unload_model()
@@ -282,7 +282,7 @@ sequenceDiagram
         OS-->>-LMM: memory_allocated
         LMM->>+Model2: load_model_weights()
         Model2-->>-LMM: model_ready
-        LMM-->>-Agent: LoadedModel(qwen2.5-7b)
+        LMM-->>-Agent: LoadedModel qwen2.5-7b
     end
 ```
 
@@ -296,8 +296,8 @@ sequenceDiagram
     participant ConsumerAgent1 as Consumer Agent 1
     participant ConsumerAgent2 as Consumer Agent 2
 
-    ProducerAgent->>+MessageBus: publish_event("anomaly.detected", event_data)
-    MessageBus->>MessageBus: route_to_subscribers("anomaly.detected")
+    ProducerAgent->>+MessageBus: publish_event(anomaly.detected, event_data)
+    MessageBus->>MessageBus: route_to_subscribers(anomaly.detected)
     
     par Parallel Processing
         MessageBus->>+ConsumerAgent1: handle_event(anomaly_event)
@@ -321,7 +321,7 @@ sequenceDiagram
     participant CS as Context Store
     participant MS as Memory Store
 
-    User->>+CE: "What was the consumption trend last month?"
+    User->>+CE: What was the consumption trend last month?
     CE->>+CS: get_conversation_context(session_id)
     CS-->>-CE: previous_context
     
@@ -335,7 +335,7 @@ sequenceDiagram
     CE->>+CS: update_conversation_context(session_id, new_context)
     CS-->>-CE: context_updated
     
-    CE-->>-User: "Based on your building portfolio, last month showed..."
+    CE-->>-User: Based on your building portfolio, last month showed...
 ```
 
 ## 📊 Enhanced Performance Considerations
