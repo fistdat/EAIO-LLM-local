@@ -1,6 +1,10 @@
 # EAIO Architecture Summary
 **Architecture Mode (A.*) - Complete System Architecture with BDG2 Integration**
 
+## 🏗️ Complete System Architecture
+
+The Energy AI Optimizer (EAIO) implements a **comprehensive 6-layer architecture** with **MCP integration**, **LangGraph multi-agent framework**, and **hybrid LLM capabilities**, specifically designed for energy optimization with real-world BDG2 dataset validation.
+
 ## 🎯 Executive Architecture Overview
 
 The Enhanced Energy AI Optimizer (EAIO) system integrates the **Building Data Genome Project 2 (BDG2)** dataset with **Milvus vector database**, **PostgreSQL + TimescaleDB**, and **Next.js + Streamlit** frontend architecture, delivering validated enterprise-grade energy management through real-world data patterns and advanced AI capabilities.
@@ -237,4 +241,246 @@ The Enhanced Energy AI Optimizer (EAIO) system integrates the **Building Data Ge
 - ✅ Modern Next.js + Streamlit frontend architecture
 - ✅ Validated performance with real-world data volumes
 
-**Ready for Enhanced Development Mode (T.*) with BDG2 Integration** 🚀 
+**Ready for Enhanced Development Mode (T.*) with BDG2 Integration** 🚀
+
+## 📋 Architectural Decision Records (ADRs)
+
+### ADR-001: MCP Integration Architecture
+**Decision**: Implement Model Context Protocol (MCP) for standardized tool integration
+**Context**: Need for standardized, maintainable tool integration across multiple data sources
+**Consequences**: 
+- ✅ Standardized tool interface across all agents
+- ✅ Simplified addition of new data sources and tools
+- ✅ Better error handling and monitoring
+- ❌ Additional abstraction layer complexity
+
+### ADR-002: LangGraph + LangChain Multi-Agent Framework
+**Decision**: Use LangGraph for workflow orchestration with LangChain for individual agents
+**Context**: Need for complex multi-agent workflows with state management and tool integration
+**Consequences**:
+- ✅ Native state management for complex workflows
+- ✅ Built-in checkpointing and recovery mechanisms
+- ✅ Conditional workflow routing based on agent results
+- ✅ Integration with broader LangChain ecosystem
+- ❌ Learning curve for LangGraph-specific patterns
+
+### ADR-003: Multi-Layer Memory Architecture  
+**Decision**: Implement 5-layer memory system (short-term, working, episodic, semantic, procedural)
+**Context**: Different types of memory needed for intelligent agent behavior
+**Consequences**:
+- ✅ Appropriate memory type for each use case
+- ✅ Intelligent context retrieval and storage
+- ✅ Long-term learning and pattern recognition
+- ❌ Increased system complexity and resource usage
+
+### ADR-004: LangSmith Integration for Monitoring
+**Decision**: Use LangSmith for comprehensive agent workflow monitoring
+**Context**: Need for specialized monitoring of LangChain/LangGraph workflows
+**Consequences**:
+- ✅ Purpose-built monitoring for LangChain frameworks
+- ✅ Detailed workflow tracing and performance metrics
+- ✅ Cost tracking for external LLM usage
+- ❌ Additional dependency and configuration
+
+## 🔧 Layer Architecture Details
+
+### Layer 1: User Interface Layer
+**Components**: Next.js Web App, Streamlit Analytics, Progressive Web App
+**Purpose**: Multi-role dashboards with real-time energy monitoring
+**Key Features**: Executive/Analyst/Manager views, real-time updates, mobile support
+
+### Layer 2: Hybrid LLM Infrastructure  
+**Components**: HybridLLMRouter, Local Models (Llama/Qwen), External APIs (OpenAI/DeepSeek/Gemini)
+**Purpose**: Privacy-first LLM routing with external capability fallback
+**Key Features**: Privacy classification, cost optimization, automatic fallback
+
+### Layer 3: MCP Integration Layer ⭐ **NEW**
+**Components**: Energy Data Server, Weather Server, ML Models Server, Building Control Server, BDG2 Data Server
+**Purpose**: Standardized tool integration for all agent operations
+**Key Features**: Tool caching, server health monitoring, category-based tool organization
+
+### Layer 4: Multi-Agent Framework (LangGraph + LangChain) ⭐ **NEW**
+**Components**: StateGraph Workflow, 5 Specialized Agents, Memory Manager, LangSmith Monitoring
+**Purpose**: Orchestrated multi-agent workflows with state management
+**Key Features**: 
+- **LangGraph**: State-based workflow orchestration with conditional routing
+- **LangChain**: Individual agent logic with tool integration and memory
+- **Agents**: Coordinator, Data Intelligence, Optimization Strategist, Forecast Intelligence, Control Coordination
+- **Memory Integration**: Multi-layer memory access for each agent type
+
+### Layer 5: Memory Systems ⭐ **NEW**
+**Components**: 5-layer memory architecture (Short-term, Working, Episodic, Semantic, Procedural)
+**Purpose**: Comprehensive memory management for intelligent agent behavior
+**Key Features**:
+- **Short-term Memory**: Redis + ConversationBufferWindowMemory (20 exchanges)
+- **Working Memory**: Redis + ConversationSummaryBufferMemory (2000 tokens)
+- **Episodic Memory**: Milvus + building-specific patterns and insights
+- **Semantic Memory**: ChromaDB + domain knowledge and BDG2 benchmarks
+- **Procedural Memory**: PostgreSQL + agent skills and procedures
+
+### Layer 6: Data Infrastructure Layer
+**Components**: PostgreSQL + TimescaleDB, Milvus Vector DB, Redis Cache
+**Purpose**: Optimized data storage for energy time-series and AI operations
+**Key Features**: BDG2 schema, vector collections, performance optimization
+
+## 🤖 Multi-Agent Workflow Architecture
+
+### Agent Specialization Matrix
+| Agent | LLM Provider | Memory Type | MCP Tools | Specialization |
+|-------|-------------|-------------|-----------|----------------|
+| **Coordinator** | Local Llama-3.2-3B | Working Memory | All Categories | Workflow orchestration |
+| **Data Intelligence** | Local Llama-3.2-3B | Episodic Memory | Data Collection + Analysis | BDG2 analysis & patterns |
+| **Optimization Strategist** | External DeepSeek-V3 | Working + Episodic | Analysis + Recommendations | Energy optimization strategy |
+| **Forecast Intelligence** | Hybrid Routing | Episodic Memory | Analysis + Weather | Predictive modeling |
+| **Control Coordination** | Local Qwen2.5-7B | Short-term Memory | Control + Validation | Building system control |
+
+### LangGraph Workflow States
+```yaml
+Agent State Schema:
+  core_workflow:
+    - messages: List[BaseMessage]
+    - current_agent: str
+    - workflow_status: str
+    
+  building_context:
+    - building_context: Dict[str, Any]
+    - building_id: str
+    - user_role: str
+    
+  analysis_results:
+    - analysis_results: Dict[str, Dict]
+    - recommendations: List[Dict]
+    - forecasts: Dict[str, Any]
+    - control_commands: List[Dict]
+    
+  memory_management:
+    - conversation_id: str
+    - memory_context: Dict[str, Any]
+    
+  performance_tracking:
+    - timestamp: float
+    - token_usage: Dict[str, int]
+    - mcp_tools_used: List[str]
+```
+
+## 🔄 MCP Integration Architecture
+
+### MCP Server Configuration
+```yaml
+Energy Data Server:
+  command: "python -m eaio_mcp.energy_server"
+  tools: ["get_energy_consumption", "get_sensor_readings", "detect_anomalies"]
+  timeout: 30s
+  cache_ttl: 300s
+
+Weather Integration Server:
+  command: "npx @eaio/weather-mcp-server"
+  tools: ["get_weather_forecast", "get_historical_weather", "calculate_weather_impact"]
+  timeout: 15s
+  cache_ttl: 1800s
+
+ML Models Server:
+  command: "python -m eaio_mcp.ml_server"
+  tools: ["forecast_energy_usage", "calculate_efficiency", "recommend_optimizations"]
+  timeout: 45s
+  cache_ttl: 900s
+
+Building Control Server:
+  command: "uvx eaio-building-control-mcp"
+  tools: ["adjust_hvac_settings", "optimize_lighting", "schedule_equipment"]
+  timeout: 60s
+  cache_ttl: 60s
+
+BDG2 Data Server:
+  command: "python -m eaio_mcp.bdg2_server"
+  tools: ["query_bdg2_buildings", "get_benchmarking_data", "compare_performance"]
+  timeout: 20s
+  cache_ttl: 7200s
+```
+
+### Tool Category Organization
+- **Data Collection**: Energy consumption, sensor readings, BDG2 queries, weather data
+- **Analysis**: Anomaly detection, forecasting, efficiency calculation, benchmarking
+- **Control**: HVAC adjustment, lighting optimization, equipment scheduling
+- **Recommendations**: Optimization suggestions, maintenance planning, ROI calculation
+
+## 🧠 Memory System Integration
+
+### Memory Layer Coordination
+```yaml
+Memory Access Patterns:
+  coordinator_agent:
+    primary: "working_memory"
+    secondary: ["short_term_memory"]
+    purpose: "Workflow coordination and routing decisions"
+    
+  data_intelligence_agent:
+    primary: "episodic_memory"
+    secondary: ["semantic_memory", "working_memory"]
+    purpose: "Building pattern recognition and historical analysis"
+    
+  optimization_strategist_agent:
+    primary: "working_memory + episodic_memory"
+    secondary: ["semantic_memory", "procedural_memory"]
+    purpose: "Strategy development with historical context"
+    
+  forecast_intelligence_agent:
+    primary: "episodic_memory"
+    secondary: ["semantic_memory"]
+    purpose: "Pattern-based forecasting with domain knowledge"
+    
+  control_coordination_agent:
+    primary: "short_term_memory"
+    secondary: ["procedural_memory"]
+    purpose: "Immediate control decisions with safety procedures"
+```
+
+### Memory Consolidation Process
+1. **Real-time Updates**: Short-term and working memory updated during conversations
+2. **Pattern Extraction**: Episodic memory updated with new building insights
+3. **Knowledge Integration**: Semantic memory enriched with successful strategies
+4. **Skill Learning**: Procedural memory updated with effective procedures
+5. **Periodic Consolidation**: Weekly pattern analysis and long-term memory optimization
+
+## 📊 Performance Optimization Strategy
+
+### Multi-Layer Caching
+- **MCP Tool Results**: Redis caching with category-specific TTL
+- **Memory Retrieval**: Vector search optimization with similarity thresholds
+- **LLM Responses**: Intelligent caching for repeated patterns
+- **Database Queries**: Connection pooling and materialized views
+
+### Resource Management
+- **Local LLM**: Model swapping based on complexity and availability
+- **Memory Usage**: Automatic cleanup and consolidation
+- **MCP Servers**: Health monitoring and automatic restart
+- **Database Connections**: Pooling and timeout management
+
+## 🔒 Security & Privacy Integration
+
+### Privacy-First Architecture
+- **Local Processing**: Sensitive building data processed locally
+- **Data Classification**: Automatic privacy level assessment
+- **Secure Communication**: mTLS for external APIs, local-only for MCP
+- **Audit Trails**: Complete logging of data access and processing
+
+### Multi-Layer Security
+- **Authentication**: JWT tokens with role-based access
+- **Authorization**: Resource-level permissions per user role
+- **Data Encryption**: At-rest and in-transit protection
+- **Network Security**: Segmented access and firewall protection
+
+## 🎯 Business Value Delivery
+
+### Comprehensive Energy Intelligence
+- **Real-time Monitoring**: Live energy consumption tracking with anomaly detection
+- **Predictive Analytics**: 24-hour forecasting with weather correlation
+- **Optimization Strategies**: AI-generated recommendations with ROI analysis
+- **Benchmarking**: BDG2-based performance comparison and improvement targets
+
+### Multi-Stakeholder Value
+- **Executives**: Portfolio-level KPIs, strategic insights, ROI analysis
+- **Energy Analysts**: Technical deep-dive analysis, model parameters, advanced analytics
+- **Facility Managers**: Operational dashboards, immediate alerts, system controls
+
+This comprehensive architecture provides a robust foundation for intelligent energy optimization with enterprise-grade security, performance, and scalability. 

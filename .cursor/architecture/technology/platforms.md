@@ -451,3 +451,381 @@ class LLMConfig:
 ```
 
 This hybrid LLM architecture provides maximum flexibility while maintaining privacy, cost control, and performance optimization for the EAIO energy management system. 
+
+## 🚀 Technology Stack Overview
+
+The EAIO system uses a **hybrid LLM architecture with MCP integration** and **LangGraph multi-agent framework**, optimized for both local privacy-first processing and advanced external API capabilities.
+
+## Layer 4: Multi-Agent Framework
+
+### LangGraph + LangChain Integration
+```yaml
+Primary Framework: LangGraph v0.2.x
+  description: "State-based multi-agent workflow orchestration"
+  advantages:
+    - Native state management for complex workflows
+    - Built-in checkpointing and recovery
+    - Conditional edge routing for dynamic workflows
+    - Integration with LangChain ecosystem
+  
+  core_features:
+    - StateGraph: Define agent workflow topology
+    - Conditional Edges: Dynamic routing based on state
+    - Checkpointing: Persistent workflow state
+    - Streaming: Real-time workflow execution updates
+
+LangChain Framework: v0.3.x
+  description: "Agent orchestration and tool integration"
+  components:
+    - ConversationBufferWindowMemory: Short-term conversation memory
+    - AgentExecutor: Tool-enabled agent execution
+    - BaseMessage: Structured message handling
+    - StructuredChatAgent: JSON-structured agent responses
+  
+  memory_types:
+    short_term:
+      type: "ConversationBufferWindowMemory"
+      window_size: 20  # Last 20 exchanges
+      storage: "Redis (in-memory)"
+      ttl: "1 hour"
+      
+    working_memory:
+      type: "ConversationSummaryBufferMemory" 
+      max_token_limit: 2000
+      summarization_llm: "Llama-3.2-3B"
+      storage: "Redis (persistent)"
+      
+    episodic_memory:
+      type: "VectorStoreRetrieverMemory"
+      vector_store: "Milvus"
+      embedding_model: "all-MiniLM-L6-v2"
+      retrieval_limit: 5
+      similarity_threshold: 0.7
+
+LangSmith Integration: v0.1.x
+  description: "Agent performance monitoring and tracing"
+  features:
+    - Workflow Tracing: End-to-end execution tracking
+    - Agent Performance: Response time and accuracy metrics
+    - Cost Tracking: Token usage and API costs
+    - Error Monitoring: Failure detection and analysis
+    - A/B Testing: Compare agent configurations
+  
+  monitoring_setup:
+    project_name: "eaio-multi-agent"
+    environment: "production"
+    trace_sampling: 100  # Trace all interactions
+    metadata_capture:
+      - agent_type
+      - building_id  
+      - user_role
+      - response_time
+      - token_usage
+      - mcp_tools_used
+
+Multi-Agent Configuration:
+  coordinator_agent:
+    llm_provider: "Local Llama-3.2-3B"
+    memory_type: "working_memory"
+    mcp_tools: ["all_categories"]
+    role: "Workflow orchestration and routing"
+    
+  data_intelligence_agent:
+    llm_provider: "Local Llama-3.2-3B" 
+    memory_type: "episodic_memory"
+    mcp_tools: ["data_collection", "analysis"]
+    specialization: "BDG2 data analysis and pattern recognition"
+    
+  optimization_strategist_agent:
+    llm_provider: "External DeepSeek-V3"
+    memory_type: "working_memory + episodic_memory"
+    mcp_tools: ["analysis", "recommendations"]
+    specialization: "Energy optimization strategy development"
+    
+  forecast_intelligence_agent:
+    llm_provider: "Hybrid routing"
+    memory_type: "episodic_memory"
+    mcp_tools: ["analysis", "weather_integration"]
+    specialization: "Predictive energy consumption modeling"
+    
+  control_coordination_agent:
+    llm_provider: "Local Qwen2.5-7B"
+    memory_type: "short_term_memory"
+    mcp_tools: ["control", "validation"]
+    specialization: "Building system control and safety validation"
+```
+
+### Agent State Management
+```python
+# LangGraph Agent State Schema
+class EAIOAgentState(TypedDict):
+    # Core workflow state
+    messages: List[BaseMessage]
+    current_agent: str
+    workflow_status: str
+    
+    # Building context
+    building_context: Dict[str, Any]
+    building_id: str
+    user_role: str
+    
+    # Analysis results from specialists
+    analysis_results: Dict[str, Dict]
+    recommendations: List[Dict]
+    forecasts: Dict[str, Any]
+    control_commands: List[Dict]
+    
+    # Memory and conversation
+    conversation_id: str
+    memory_context: Dict[str, Any]
+    
+    # Performance tracking
+    timestamp: float
+    token_usage: Dict[str, int]
+    mcp_tools_used: List[str]
+    
+    # Error handling
+    errors: List[Dict]
+    retry_count: int
+    fallback_used: bool
+
+# State transition validation
+def validate_state_transition(from_agent: str, to_agent: str, state: EAIOAgentState) -> bool:
+    """Validate agent state transitions"""
+    
+    transition_rules = {
+        "coordinator": ["data_intelligence", "optimization_strategist", "forecast_intelligence", "control_coordination"],
+        "data_intelligence": ["response_synthesizer", "optimization_strategist"], 
+        "optimization_strategist": ["control_coordination", "response_synthesizer"],
+        "forecast_intelligence": ["optimization_strategist", "response_synthesizer"],
+        "control_coordination": ["response_synthesizer"],
+        "response_synthesizer": []  # Terminal state
+    }
+    
+    return to_agent in transition_rules.get(from_agent, [])
+```
+
+## Layer 5: Memory Systems
+
+### Comprehensive Memory Architecture
+```yaml
+Memory Architecture: "Multi-layered memory system for agent intelligence"
+
+Layer 1 - Short-term Memory (Working Memory):
+  technology: "Redis + LangChain ConversationBufferWindowMemory"
+  capacity: "20 conversation exchanges (last 1 hour)"
+  purpose: "Immediate conversation context and agent coordination"
+  storage_location: "Redis DB 2"
+  ttl: "1 hour"
+  
+  implementation:
+    conversation_tracking:
+      format: "List[BaseMessage]"
+      max_messages: 20
+      auto_summarization: true
+      
+    agent_coordination:
+      shared_state: "Current workflow status and intermediate results"
+      message_passing: "Inter-agent communication buffer"
+      error_context: "Recent errors and recovery attempts"
+
+Layer 2 - Working Memory (Session Memory):
+  technology: "Redis + LangChain ConversationSummaryBufferMemory"
+  capacity: "2000 tokens of summarized context"
+  purpose: "Extended session context with intelligent summarization"
+  storage_location: "Redis DB 3" 
+  ttl: "24 hours"
+  
+  implementation:
+    summarization_llm: "Llama-3.2-3B (local)"
+    summarization_trigger: "When token limit exceeded"
+    context_preservation: "Key facts, user preferences, building specifics"
+    
+    session_context:
+      user_preferences: "Analysis depth, preferred visualizations"
+      building_focus: "Currently analyzed buildings and their context"
+      optimization_goals: "User-specified energy targets and constraints"
+
+Layer 3 - Episodic Memory (Long-term Patterns):
+  technology: "Milvus + OpenAI Embeddings"
+  capacity: "Unlimited (building-specific patterns and insights)"
+  purpose: "Long-term building behavior patterns and optimization history"
+  storage_location: "Milvus collection: building_episodic_memory"
+  
+  implementation:
+    embedding_model: "all-MiniLM-L6-v2 (384 dimensions)"
+    similarity_search: "Cosine similarity with threshold 0.7"
+    metadata_fields:
+      - building_id
+      - timestamp
+      - memory_type: ["pattern", "anomaly", "optimization", "insight"]
+      - confidence_score
+      - agent_source
+      
+    memory_types:
+      patterns: "Recurring energy consumption behaviors"
+      anomalies: "Unusual consumption events and their causes"
+      optimizations: "Successful optimization strategies and results"
+      insights: "AI-generated insights about building performance"
+
+Layer 4 - Semantic Memory (Knowledge Base):
+  technology: "Milvus + ChromaDB hybrid"
+  capacity: "Building Domain Knowledge + BDG2 Dataset Insights"
+  purpose: "Structured domain knowledge for intelligent reasoning"
+  storage_location: "Milvus collection: domain_knowledge"
+  
+  implementation:
+    knowledge_categories:
+      building_systems: "HVAC, lighting, control system knowledge"
+      energy_physics: "Thermodynamics, efficiency principles"
+      bdg2_benchmarks: "Building performance benchmarks and comparisons"
+      optimization_strategies: "Proven energy optimization techniques"
+      
+    knowledge_retrieval:
+      query_expansion: "Automatic query expansion for better retrieval"
+      context_ranking: "Relevance scoring based on building type and context"
+      knowledge_fusion: "Combining multiple knowledge sources"
+
+Layer 5 - Procedural Memory (Agent Skills):
+  technology: "MCP Tool Registry + Skill Database"
+  capacity: "Agent capabilities and learned procedures"
+  purpose: "Store and retrieve agent skills, tool configurations, and procedures"
+  storage_location: "PostgreSQL + JSON schema"
+  
+  implementation:
+    skill_categories:
+      analysis_procedures: "Step-by-step analysis workflows"
+      optimization_algorithms: "Optimization strategies and parameters"
+      control_procedures: "Building control sequences and safety checks"
+      reporting_templates: "Structured report generation procedures"
+      
+    skill_learning:
+      success_tracking: "Track successful procedure executions"
+      parameter_optimization: "Learn optimal parameters for procedures"
+      failure_analysis: "Learn from failed procedures and improve"
+```
+
+### Memory Integration Patterns
+```python
+class EAIOMemoryManager:
+    """Comprehensive memory management for EAIO agents"""
+    
+    def __init__(self):
+        # Initialize memory layers
+        self.short_term = Redis(host='localhost', port=6379, db=2)
+        self.working_memory = Redis(host='localhost', port=6379, db=3)
+        self.episodic_memory = MilvusClient(uri="http://localhost:19530")
+        self.semantic_memory = ChromaClient()
+        self.procedural_memory = PostgreSQLClient()
+        
+        # Memory coordination
+        self.memory_coordinator = MemoryCoordinator()
+        
+    async def get_context_for_agent(self, agent_type: str, building_id: str, conversation_id: str) -> Dict:
+        """Retrieve appropriate memory context for specific agent"""
+        
+        context = {}
+        
+        # Short-term conversation context
+        if agent_type in ["coordinator", "response_synthesizer"]:
+            context["conversation"] = await self.get_short_term_memory(conversation_id)
+            
+        # Working memory for session context
+        if agent_type != "control_coordination":  # Control agents need minimal context
+            context["session"] = await self.get_working_memory(conversation_id)
+            
+        # Episodic memory for building-specific patterns
+        if building_id:
+            context["building_patterns"] = await self.get_episodic_memory(building_id, agent_type)
+            
+        # Semantic memory for domain knowledge
+        context["domain_knowledge"] = await self.get_semantic_memory(agent_type)
+        
+        # Procedural memory for agent skills
+        context["procedures"] = await self.get_procedural_memory(agent_type)
+        
+        return context
+    
+    async def update_memory_from_interaction(self, agent_type: str, building_id: str, 
+                                           interaction_data: Dict, results: Dict):
+        """Update memory layers based on agent interaction results"""
+        
+        # Update short-term memory
+        await self.update_short_term_memory(
+            interaction_data["conversation_id"],
+            interaction_data["messages"]
+        )
+        
+        # Update working memory with session insights
+        if results.get("insights"):
+            await self.update_working_memory(
+                interaction_data["conversation_id"],
+                results["insights"]
+            )
+            
+        # Update episodic memory with building-specific learnings
+        if building_id and results.get("patterns"):
+            await self.update_episodic_memory(
+                building_id,
+                agent_type,
+                results["patterns"]
+            )
+            
+        # Update procedural memory with successful procedures
+        if results.get("successful_procedures"):
+            await self.update_procedural_memory(
+                agent_type,
+                results["successful_procedures"]
+            )
+    
+    async def memory_consolidation(self, building_id: str):
+        """Periodic memory consolidation to extract long-term patterns"""
+        
+        # Extract patterns from recent episodic memories
+        recent_memories = await self.episodic_memory.search(
+            collection_name="building_episodic_memory",
+            filter=f'building_id == "{building_id}" and timestamp > {time.time() - 86400*7}',  # Last week
+            limit=100
+        )
+        
+        # Use local LLM to identify patterns
+        pattern_extractor = LangChainAgent(
+            llm=LocalLLM("Llama-3.2-3B"),
+            task="Extract recurring patterns from building memory data"
+        )
+        
+        consolidated_patterns = await pattern_extractor.analyze(recent_memories)
+        
+        # Store consolidated patterns
+        await self.store_consolidated_patterns(building_id, consolidated_patterns)
+```
+
+## Integration Matrix
+
+### Framework Integration Overview
+| Component | Technology | Purpose | Integration Method |
+|-----------|------------|---------|------------------|
+| **Workflow Orchestration** | LangGraph StateGraph | Multi-agent coordination | Native state management |
+| **Agent Framework** | LangChain Agents | Individual agent logic | Tool integration + memory |
+| **Tool Integration** | MCP Protocol | External tool access | Standardized JSON-RPC |
+| **Memory Management** | Multi-layer (Redis+Milvus) | Context and learning | Automatic memory updates |
+| **Performance Monitoring** | LangSmith | Agent performance tracking | Workflow tracing |
+| **LLM Routing** | Hybrid Router | Local + external LLMs | Privacy-aware routing |
+
+### Technology Decision Matrix
+| Requirement | Technology Choice | Alternative Considered | Decision Rationale |
+|-------------|------------------|----------------------|-------------------|
+| **Multi-Agent Framework** | LangGraph + LangChain | AutoGen, CrewAI | State management + LangChain ecosystem |
+| **Memory System** | Multi-layer (Redis+Milvus) | Single vector store | Different memory needs require different solutions |
+| **Tool Integration** | MCP Protocol | Direct API calls | Standardization and maintainability |
+| **Monitoring** | LangSmith | Custom logging | Purpose-built for LangChain workflows |
+| **Local LLM** | Ollama + vLLM | Direct model loading | Better resource management |
+
+### Performance Targets with Framework
+| Metric | Target | Technology Enabler |
+|--------|--------|--------------------|
+| **Agent Response Time** | < 5s (simple), < 30s (complex) | Local LLM + MCP caching |
+| **Memory Retrieval** | < 200ms vector search | Milvus optimization |
+| **Workflow Coordination** | < 100ms state transitions | LangGraph state management |
+| **Tool Execution** | < 2s average | MCP server optimization |
+| **Memory Updates** | < 50ms short-term | Redis in-memory operations |

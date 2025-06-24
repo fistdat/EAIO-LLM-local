@@ -359,3 +359,291 @@ sequenceDiagram
 - **Frontend Performance**: Next.js ISR, Streamlit selective reruns
 - **BDG2 Integration**: Batch processing, materialized views for common queries
 - **Memory Management**: Intelligent model swapping, connection pooling 
+
+## 🔄 Overview
+
+This document contains detailed sequence diagrams for key EAIO system interactions, focusing on MCP integration, multi-agent workflows, and LangGraph orchestration.
+
+## Sequence 6: MCP Integration & Tool Execution
+
+```mermaid
+sequenceDiagram
+    participant UI as Web UI
+    participant API as FastAPI
+    participant Coord as Coordinator Agent
+    participant MCP as MCP Integration Layer
+    participant ES as Energy Data Server
+    participant WS as Weather Server
+    participant MS as ML Models Server
+    participant DB as PostgreSQL
+    participant Cache as Redis Cache
+
+    UI->>API: POST /api/analysis/building/{id}
+    API->>Coord: Initialize analysis request
+    
+    Note over Coord: LangGraph workflow starts
+    Coord->>MCP: setup_mcp_tools("data_intelligence")
+    
+    MCP->>ES: Start energy_data_server
+    ES-->>MCP: Server ready with tools
+    
+    MCP->>WS: Start weather_server  
+    WS-->>MCP: Server ready with tools
+    
+    MCP-->>Coord: MCP tools available
+    
+    Note over Coord: Route to Data Intelligence Agent
+    Coord->>MCP: cached_mcp_call("get_energy_consumption", building_id)
+    
+    MCP->>Cache: Check cache for energy data
+    alt Cache Hit
+        Cache-->>MCP: Return cached data
+    else Cache Miss
+        MCP->>ES: execute_tool("get_energy_consumption")
+        ES->>DB: Query energy consumption data
+        DB-->>ES: Return time-series data
+        ES-->>MCP: Processed energy data
+        MCP->>Cache: Store result with TTL
+    end
+    
+    MCP-->>Coord: Energy consumption data
+    
+    Coord->>MCP: cached_mcp_call("get_weather_forecast")
+    MCP->>WS: execute_tool("get_weather_forecast")
+    WS->>External: Call weather API
+    External-->>WS: Weather forecast data
+    WS-->>MCP: Processed weather data
+    MCP-->>Coord: Weather correlation data
+    
+    Note over Coord: Data analysis complete
+    Coord->>API: Analysis results with recommendations
+    API-->>UI: JSON response with insights
+```
+
+## Sequence 7: LangGraph Multi-Agent Workflow
+
+```mermaid
+sequenceDiagram
+    participant User as User Interface
+    participant LG as LangGraph Coordinator
+    participant DI as Data Intelligence Agent
+    participant OS as Optimization Strategist
+    participant FI as Forecast Intelligence
+    participant CC as Control Coordination
+    participant RS as Response Synthesizer
+    participant Memory as Memory Manager
+    participant LS as LangSmith Tracing
+
+    User->>LG: "Optimize energy for Building A"
+    
+    Note over LG: StateGraph workflow begins
+    LG->>LS: Start trace("multi_agent_workflow")
+    
+    LG->>LG: _route_to_specialist()
+    Note over LG: Determines: data_analysis + optimization needed
+    
+    par Parallel Agent Execution
+        LG->>DI: Analyze current energy patterns
+        and LG->>FI: Generate energy forecasts
+    end
+    
+    DI->>Memory: get_building_memory("Building_A")
+    Memory-->>DI: Historical patterns & insights
+    
+    DI->>MCP: Execute data collection tools
+    MCP-->>DI: Current energy consumption + anomalies
+    
+    DI->>Memory: update_building_memory() with new insights
+    DI-->>LG: State update: analysis_results["data_intelligence"]
+    
+    FI->>MCP: Execute forecasting tools  
+    MCP-->>FI: 24h energy forecast + weather correlation
+    FI-->>LG: State update: analysis_results["forecast_intelligence"]
+    
+    Note over LG: Route to Optimization Strategist
+    LG->>OS: Optimize based on analysis + forecasts
+    
+    OS->>MCP: Execute optimization tools
+    MCP-->>OS: Recommended HVAC/lighting adjustments
+    
+    OS->>Memory: get_short_term_memory(conversation_id)
+    Memory-->>OS: Recent optimization context
+    
+    OS-->>LG: State update: recommendations[]
+    
+    Note over LG: Route to Control Coordination
+    LG->>CC: Validate and prepare control commands
+    
+    CC->>MCP: Execute control validation tools
+    MCP-->>CC: Safety checks + feasibility analysis
+    CC-->>LG: State update: validated_controls
+    
+    Note over LG: Route to Response Synthesizer
+    LG->>RS: Synthesize final response for user
+    
+    RS->>Memory: get_short_term_memory() for context
+    Memory-->>RS: Conversation history
+    
+    RS->>LG: Final synthesis based on all agent results
+    
+    LG->>LS: Log workflow completion with metadata
+    LG-->>User: "Optimization complete: 12% savings projected"
+```
+
+## Sequence 8: LangChain Agent with Memory Integration
+
+```mermaid
+sequenceDiagram
+    participant Agent as LangChain Agent
+    participant LLM as Hybrid LLM Router
+    participant Tools as MCP Tools
+    participant STM as Short-term Memory (Redis)
+    participant LTM as Long-term Memory (Milvus)
+    participant LS as LangSmith
+
+    Note over Agent: ConversationBufferWindowMemory initialized
+    
+    Agent->>STM: Load recent conversation history (k=20)
+    STM-->>Agent: Recent chat messages
+    
+    Agent->>LTM: get_building_memory(building_id)
+    LTM->>LTM: Search building_memory collection
+    LTM-->>Agent: Historical building patterns
+    
+    Agent->>LLM: Route request based on complexity
+    alt High Complexity
+        LLM->>External: Use DeepSeek-V3 API
+        External-->>LLM: Advanced analysis
+    else Medium Complexity  
+        LLM->>Local: Use Qwen2.5-7B locally
+        Local-->>LLM: Efficient processing
+    else Low Complexity
+        LLM->>Local: Use Llama-3.2-3B locally  
+        Local-->>LLM: Fast response
+    end
+    LLM-->>Agent: LLM response
+    
+    Note over Agent: Determine if tools needed
+    Agent->>Tools: execute_mcp_tool("forecast_energy_usage")
+    Tools-->>Agent: Forecasting results
+    
+    Agent->>LS: Trace agent interaction with metadata
+    LS-->>Agent: Trace logged
+    
+    Agent->>STM: Update conversation memory
+    Agent->>LTM: update_building_memory() if new insights
+    
+    Agent-->>Agent: Return structured response
+```
+
+## Sequence 11: Hybrid LLM Request Routing & Fallback
+
+```mermaid
+sequenceDiagram
+    participant Agent as Agent Request
+    participant Router as HybridLLMRouter
+    participant PC as PrivacyClassifier
+    participant CM as CostManager
+    participant Local as Local LLM (Llama/Qwen)
+    participant OpenAI as OpenAI GPT-4o
+    participant DeepSeek as DeepSeek-V3
+    participant Gemini as Gemini Pro
+    participant Cache as Response Cache
+
+    Agent->>Router: Process energy analysis request
+    
+    Router->>PC: classify_privacy_level(request)
+    PC-->>Router: Privacy level: "ENHANCED"
+    
+    Router->>CM: check_budget_availability()
+    CM-->>Router: Budget status: OK for external APIs
+    
+    Router->>Router: determine_optimal_provider()
+    Note over Router: Task: technical analysis → DeepSeek preferred
+    
+    Router->>Cache: Check for cached response
+    Cache-->>Router: Cache miss
+    
+    Router->>DeepSeek: Submit request to DeepSeek-V3
+    
+    alt DeepSeek Success
+        DeepSeek-->>Router: Technical analysis response
+        Router->>CM: track_usage(provider="deepseek", tokens=1500)
+        Router->>Cache: Cache response (TTL: 900s)
+    else DeepSeek Failure
+        Router->>OpenAI: Fallback to GPT-4o
+        alt OpenAI Success
+            OpenAI-->>Router: Analysis response
+            Router->>CM: track_usage(provider="openai", tokens=1200)
+        else OpenAI Failure
+            Router->>Local: Final fallback to Qwen2.5-7B
+            Local-->>Router: Local analysis response
+            Note over Router: Log fallback event for monitoring
+        end
+    end
+    
+    Router-->>Agent: Final response with provider metadata
+```
+
+## Sequence 12: MCP Server Lifecycle & Health Monitoring
+
+```mermaid
+sequenceDiagram
+    participant Startup as System Startup
+    participant MCP as MCP Integration Layer
+    participant ES as Energy Data Server
+    participant WS as Weather Server
+    participant MS as ML Models Server
+    participant HM as Health Monitor
+    participant Alert as Alert System
+
+    Startup->>MCP: Initialize MCP servers
+    
+    par Server Initialization
+        MCP->>ES: Start energy_data_server process
+        and MCP->>WS: Start weather_server process  
+        and MCP->>MS: Start ml_models_server process
+    end
+    
+    ES-->>MCP: Server ready, tools available
+    WS-->>MCP: Server ready, tools available
+    MS-->>MCP: Server ready, tools available
+    
+    MCP->>HM: Register servers for monitoring
+    
+    loop Health Check Cycle (every 30s)
+        HM->>ES: Health check ping
+        HM->>WS: Health check ping
+        HM->>MS: Health check ping
+        
+        alt All Servers Healthy
+            ES-->>HM: OK (response time: 15ms)
+            WS-->>HM: OK (response time: 12ms)
+            MS-->>HM: OK (response time: 45ms)
+        else Server Failure
+            ES-->>HM: Timeout/Error
+            HM->>Alert: Trigger alert for energy_data_server
+            Alert->>Admin: Notification sent
+            
+            HM->>MCP: Initiate server restart
+            MCP->>ES: Restart energy_data_server
+            ES-->>MCP: Server restarted successfully
+        end
+    end
+    
+    Note over HM: Continuous monitoring ensures system reliability
+```
+
+## Performance Metrics
+
+### Expected Response Times
+- **MCP Tool Execution**: < 100ms for cached data, < 2s for fresh data
+- **LangGraph Workflow**: < 5s for simple analysis, < 30s for complex multi-agent workflows  
+- **Memory Operations**: < 50ms for short-term, < 200ms for vector search
+- **LLM Routing**: < 10ms for local models, < 2s for external APIs
+
+### Throughput Targets
+- **Concurrent Workflows**: 10 simultaneous LangGraph executions
+- **MCP Tool Calls**: 100 calls/minute per server
+- **Memory Updates**: 50 updates/second to vector database
+- **Cache Hit Rate**: > 80% for frequently accessed data 

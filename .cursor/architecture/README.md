@@ -1,96 +1,166 @@
 # EAIO Architecture Documentation
-**Architecture Mode (A.*) - Complete Documentation Index**
 
-## 📋 Architecture Overview
+## 🏗️ Architecture Mode (A.*) - Complete Documentation
 
-This directory contains the complete architectural documentation for the Energy AI Optimizer (EAIO) system, enhanced with Building Data Genome Project 2 (BDG2) dataset integration and modern technology stack.
+This directory contains the comprehensive architectural documentation for the **Energy AI Optimizer (EAIO)** system, designed with **6-layer architecture**, **MCP integration**, **LangGraph multi-agent framework**, and **hybrid LLM capabilities**.
 
-## 📂 Documentation Structure
+## 📁 Documentation Structure
 
-### 🏢 Business Architecture
-- **[capabilities.md](./business/capabilities.md)** - Core business capabilities, stakeholder analysis, and value streams
+### Core Architecture Documents
+- **[`architecture_summary.md`](./architecture_summary.md)** - Executive overview and complete system architecture
+- **[`components.md`](./application/components.md)** - Detailed application layer components and MCP integration
+- **[`sequence_diagrams.md`](./application/sequence_diagrams.md)** - System interaction flows and LangGraph workflows
+- **[`platforms.md`](./technology/platforms.md)** - Technology stack with LangChain/LangGraph/LangSmith integration
 
-### 🗄️ Data Architecture  
-- **[conceptual_model.md](./data/conceptual_model.md)** - High-level data entities and relationships
-- **[physical_erd.md](./data/physical_erd.md)** - Detailed database schema and table structures
-- **[bdg2_integration_model.md](./data/bdg2_integration_model.md)** - BDG2 dataset integration and real-world data patterns
+### Business Architecture
+- **[`capabilities.md`](./business/capabilities.md)** - Core business capabilities and value propositions
+- **[`stakeholders.md`](./business/stakeholders.md)** - Stakeholder analysis and requirements
+- **[`value_streams.md`](./business/value_streams.md)** - Business value delivery streams
 
-### 🖥️ Application Architecture
-- **[components.md](./application/components.md)** - System components, agents, and interfaces
-- **[integration_patterns.md](./application/integration_patterns.md)** - Integration strategies and deployment patterns
-- **[sequence_diagrams.md](./application/sequence_diagrams.md)** - Process flows and system interactions
+### Data Architecture  
+- **[`conceptual_model.md`](./data/conceptual_model.md)** - Business entity relationships
+- **[`bdg2_integration_model.md`](./data/bdg2_integration_model.md)** - Real-world BDG2 dataset integration
+- **[`physical_erd.md`](./data/physical_erd.md)** - Database schema with Milvus vector collections
 
-### ⚙️ Technology Architecture
-- **[platforms.md](./technology/platforms.md)** - Technology stack with PostgreSQL, Milvus, Next.js, and Streamlit
+### Application Architecture
+- **[`components.md`](./application/components.md)** - 6-layer system components with MCP integration
+- **[`sequence_diagrams.md`](./application/sequence_diagrams.md)** - Multi-agent workflows and MCP interactions
+- **[`integration_patterns.md`](./application/integration_patterns.md)** - System integration strategies
 
-### 📊 Architecture Summary
-- **[architecture_summary.md](./architecture_summary.md)** - Complete architectural overview, decisions, and implementation roadmap
+### Technology Architecture
+- **[`platforms.md`](./technology/platforms.md)** - Comprehensive technology stack including:
+  - **LangGraph + LangChain**: Multi-agent framework
+  - **MCP Integration**: Standardized tool protocols
+  - **Multi-layer Memory**: 5-layer memory architecture  
+  - **LangSmith**: Workflow monitoring and tracing
+  - **Hybrid LLM**: Local + external LLM routing
 
-## 🎯 Key Architectural Features
+## 🚀 Architecture Highlights
 
-### ✅ **BDG2 Dataset Integration**
-- Real-world validation with 3,053 energy meters from 1,636 buildings
-- ASHRAE GEPIII competition-proven forecasting models
-- Industry-standard building classifications and benchmarks
+### ⭐ **New Architecture Components**
 
-### ✅ **Enterprise Technology Stack** 
-- **Hybrid LLM Architecture**: Local Ollama + External APIs (OpenAI, DeepSeek, Gemini)
-- **PostgreSQL + TimescaleDB**: Enterprise time-series database
-- **Milvus Vector Database**: Production-scale similarity search
-- **Next.js + Streamlit**: Modern full-stack and analytics interfaces
-- **Privacy-First AI**: Local processing for sensitive data, APIs for advanced capabilities
+#### 1. MCP Integration Layer
+- **5 MCP Servers**: Energy Data, Weather, ML Models, Building Control, BDG2 Data
+- **Tool Categories**: Data Collection, Analysis, Control, Recommendations
+- **Caching Strategy**: Redis with category-specific TTL
+- **Health Monitoring**: Automatic server restart and failover
 
-### ✅ **Performance Validated**
-- <100ms PostgreSQL queries with 53.6M real data points
-- <50ms Milvus vector searches across 1,636 building patterns
-- <3 minutes real-time anomaly detection with BDG2 baselines
+#### 2. LangGraph Multi-Agent Framework
+- **StateGraph Workflow**: Orchestrated multi-agent coordination
+- **5 Specialized Agents**: Coordinator, Data Intelligence, Optimization Strategist, Forecast Intelligence, Control Coordination
+- **State Management**: Persistent workflow state with checkpointing
+- **Conditional Routing**: Dynamic agent selection based on context
 
-### ✅ **M1 MacBook Pro Optimized**
-- 16GB RAM resource allocation strategy
-- Quantized LLM models for optimal performance
-- Local-first deployment maintaining data privacy
+#### 3. Comprehensive Memory Systems
+- **Short-term Memory**: Redis + ConversationBufferWindowMemory (20 exchanges)
+- **Working Memory**: Redis + ConversationSummaryBufferMemory (2000 tokens)
+- **Episodic Memory**: Milvus + building-specific patterns and insights
+- **Semantic Memory**: ChromaDB + domain knowledge and BDG2 benchmarks
+- **Procedural Memory**: PostgreSQL + agent skills and procedures
 
-## 🔄 Implementation Phases
+#### 4. LangSmith Integration
+- **Workflow Tracing**: End-to-end execution tracking
+- **Performance Monitoring**: Agent response times and accuracy
+- **Cost Tracking**: Token usage and API cost management
+- **Error Analysis**: Failure detection and learning
 
-| Phase | Duration | Focus | Key Deliverables |
-|-------|----------|--------|------------------|
-| **Phase 1** | Weeks 1-4 ✅ | BDG2 Foundation | Architecture design completed |
-| **Phase 2** | Weeks 5-8 | Database Integration | PostgreSQL + Milvus implementation |
-| **Phase 3** | Weeks 9-12 | Frontend Development | Next.js + Streamlit interfaces |
-| **Phase 4** | Weeks 13-20 | AI Agent Enhancement | BDG2 pattern recognition |
-| **Phase 5** | Weeks 21-24 | Validation & Deployment | Production optimization |
+### 🏗️ **6-Layer Architecture**
 
-## 📈 Business Value
+#### Layer 1: User Interface
+- **Next.js 14** + TypeScript (Web interface)
+- **Streamlit** (Analytics dashboard)
+- **Progressive Web App** (Mobile support)
 
-### **Immediate Benefits (0-3 months)**
-- Real-world benchmarking against 1,636 validated building peers
-- Industry-proven forecasting models from ASHRAE GEPIII competition
-- Credible anomaly detection baselines from actual building data
+#### Layer 2: Hybrid LLM Infrastructure
+- **Local Models**: Llama-3.2-3B, Qwen2.5-7B (privacy-first)
+- **External APIs**: OpenAI GPT-4o, DeepSeek-V3, Gemini Pro
+- **HybridLLMRouter**: Privacy-aware routing with cost optimization
+- **Fallback Strategy**: External → Local → Cached responses
 
-### **Medium-term Advantage (3-12 months)**
-- Data-driven insights from diverse building portfolio patterns
-- Validated optimization strategies from similar building successes
-- Pioneer position in commercial BDG2 dataset application
+#### Layer 3: MCP Integration Layer ⭐ **NEW**
+- **Standardized Tools**: JSON-RPC protocol for all data access
+- **Server Management**: Health monitoring and automatic restart
+- **Intelligent Caching**: Category-specific TTL for performance
+- **Tool Organization**: Data Collection, Analysis, Control, Recommendations
 
-### **Long-term Position (12+ months)**
-- Industry standard reference implementation for building AI
-- Foundation for next-generation building optimization technologies
-- Global scaling with international building type adaptation
+#### Layer 4: Multi-Agent Framework ⭐ **NEW**
+- **LangGraph**: State-based workflow orchestration
+- **LangChain**: Individual agent logic with tool integration
+- **Memory Integration**: Multi-layer memory access per agent type
+- **Agent Coordination**: Parallel execution with state synchronization
 
-## 🎯 Architecture Principles
+#### Layer 5: Memory Systems ⭐ **NEW**
+- **5-Layer Memory**: Different memory types for different needs
+- **Intelligent Retrieval**: Context-aware memory access
+- **Automatic Consolidation**: Pattern extraction and learning
+- **Performance Optimization**: Vector search with similarity thresholds
 
-1. **Real-World Validation**: All algorithms validated against BDG2 dataset
-2. **Privacy-First**: Local LLM deployment with zero external data sharing
-3. **Performance Optimized**: Sub-second response times for operational use
-4. **Enterprise Ready**: Production-grade technology stack and reliability
-5. **Industry Standard**: ASHRAE-aligned classifications and methodologies
+#### Layer 6: Data Infrastructure
+- **PostgreSQL + TimescaleDB**: Time-series optimization with BDG2 schema
+- **Milvus**: Production-scale vector database for memory and embeddings
+- **Redis**: Multi-database caching and session management
 
-## 📞 Next Steps
+## 🎯 Business Value Delivery
 
-**Architecture Mode (A.*) Complete** ✅  
-**Ready for Development Mode (T.*) Transition** 🚀
+### Multi-Stakeholder Intelligence
+- **Executives**: Portfolio KPIs, strategic insights, ROI analysis
+- **Energy Analysts**: Technical analysis, model parameters, advanced analytics
+- **Facility Managers**: Operational dashboards, alerts, system controls
 
-The architectural foundation is fully established with validated real-world data patterns, enterprise technology stack, and comprehensive documentation ready for implementation.
+### Real-World Validation
+- **BDG2 Dataset**: 53.6M data points from 3,053 energy meters
+- **Proven Performance**: ASHRAE GEPIII competition-validated algorithms
+- **Benchmarking**: Building performance comparison with industry standards
+
+### Advanced Capabilities
+- **Multi-Agent Intelligence**: Specialized agents for different analysis types
+- **Memory-Enhanced Learning**: Building-specific pattern recognition
+- **Hybrid LLM Routing**: Privacy-first with advanced capability fallback
+- **Standardized Integration**: MCP protocol for maintainable tool integration
+
+## 📊 Performance Targets
+
+### Response Times
+- **Simple Analysis**: < 5 seconds
+- **Complex Multi-Agent Workflows**: < 30 seconds
+- **Memory Retrieval**: < 200ms vector search
+- **MCP Tool Execution**: < 2 seconds average
+
+### Scalability
+- **Concurrent Workflows**: 10 simultaneous LangGraph executions
+- **Memory Updates**: 50 updates/second to vector database
+- **Cache Hit Rate**: > 80% for frequently accessed data
+- **Database Performance**: < 100ms PostgreSQL queries
+
+## 🔄 Architecture Evolution
+
+### Completed Enhancements
+- ✅ **MCP Integration Layer**: Standardized tool integration
+- ✅ **LangGraph Framework**: Multi-agent workflow orchestration  
+- ✅ **LangChain Integration**: Individual agent logic and memory
+- ✅ **Multi-Layer Memory**: Comprehensive memory architecture
+- ✅ **LangSmith Monitoring**: Workflow performance tracking
+- ✅ **Hybrid LLM Infrastructure**: Privacy-first with external capabilities
+
+### Ready for Development Mode (T.*)
+The architecture is now complete and ready for transition to **Development Mode (T.*)** with:
+- Comprehensive framework specifications
+- Detailed integration patterns
+- Performance optimization strategies
+- Complete technology stack definition
+
+## 🔧 Next Steps
+
+1. **Development Mode Transition**: Move from Architecture Mode (A.*) to Development Mode (T.*)
+2. **Implementation Planning**: Create detailed development tasks and sprint planning
+3. **Framework Setup**: Install and configure LangGraph, LangChain, MCP, and LangSmith
+4. **Memory System Implementation**: Set up multi-layer memory architecture
+5. **Agent Development**: Implement specialized agents with MCP tool integration
+
+---
+
+**Architecture Mode (A.*) Status**: ✅ **COMPLETE**  
+**Ready for Development Mode (T.*)**: 🚀 **READY TO PROCEED**
 
 ---
 

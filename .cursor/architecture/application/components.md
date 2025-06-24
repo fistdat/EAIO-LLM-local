@@ -501,3 +501,398 @@ class MCPToolInvoker:
 - **Dashboard Engine**: Edge caching with CDN
 - **Conversational Engine**: Connection pooling with failover
 - **Control Agent**: Hot standby with manual failover 
+
+## Layer 3: MCP Integration Layer
+
+### Model Context Protocol Framework
+```python
+# MCP Server Configuration
+class MCPIntegrationLayer:
+    """Comprehensive MCP integration for EAIO system"""
+    
+    def __init__(self):
+        self.servers = {
+            "energy_data_server": {
+                "command": "python",
+                "args": ["-m", "eaio_mcp.energy_server"],
+                "env": {"DATA_PATH": "./data/energy", "DB_URL": "postgresql://..."},
+                "timeout": 30,
+                "tools": ["get_energy_consumption", "get_sensor_readings", "detect_anomalies"]
+            },
+            
+            "building_control_server": {
+                "command": "uvx", 
+                "args": ["eaio-building-control-mcp"],
+                "env": {"CONTROL_ENDPOINT": "http://localhost:8081"},
+                "timeout": 60,
+                "tools": ["adjust_hvac_settings", "optimize_lighting", "schedule_equipment"]
+            },
+            
+            "weather_integration_server": {
+                "command": "npx",
+                "args": ["@eaio/weather-mcp-server"],
+                "env": {"WEATHER_API_KEY": os.getenv("WEATHER_API_KEY")},
+                "timeout": 15,
+                "tools": ["get_weather_forecast", "get_historical_weather", "calculate_weather_impact"]
+            },
+            
+            "ml_models_server": {
+                "command": "python",
+                "args": ["-m", "eaio_mcp.ml_server"],
+                "env": {"MODEL_PATH": "./models/", "MILVUS_URI": "http://localhost:19530"},
+                "timeout": 45,
+                "tools": ["forecast_energy_usage", "calculate_efficiency", "recommend_optimizations"]
+            },
+            
+            "bdg2_data_server": {
+                "command": "python", 
+                "args": ["-m", "eaio_mcp.bdg2_server"],
+                "env": {"BDG2_DB": "postgresql://localhost/bdg2", "CACHE_TTL": "300"},
+                "timeout": 20,
+                "tools": ["query_bdg2_buildings", "get_benchmarking_data", "compare_performance"]
+            }
+        }
+        
+        self.tool_categories = {
+            "data_collection": [
+                "get_energy_consumption", "get_sensor_readings", "query_bdg2_buildings",
+                "get_weather_forecast", "get_historical_weather"
+            ],
+            "analysis": [
+                "detect_anomalies", "forecast_energy_usage", "calculate_efficiency",
+                "calculate_weather_impact", "get_benchmarking_data", "compare_performance"
+            ],
+            "control": [
+                "adjust_hvac_settings", "optimize_lighting", "schedule_equipment"
+            ],
+            "recommendations": [
+                "recommend_optimizations", "suggest_maintenance", "calculate_roi"
+            ]
+        }
+
+    async def setup_mcp_tools(self, agent_type: str) -> List[MCPTool]:
+        """Setup MCP tools based on agent specialization"""
+        
+        if agent_type == "data_intelligence":
+            server_params = [self.servers["energy_data_server"], 
+                           self.servers["weather_integration_server"],
+                           self.servers["bdg2_data_server"]]
+                           
+        elif agent_type == "optimization_strategist":
+            server_params = [self.servers["ml_models_server"],
+                           self.servers["building_control_server"]]
+                           
+        elif agent_type == "forecast_intelligence": 
+            server_params = [self.servers["ml_models_server"],
+                           self.servers["weather_integration_server"]]
+                           
+        elif agent_type == "control_coordination":
+            server_params = [self.servers["building_control_server"],
+                           self.servers["energy_data_server"]]
+        
+        # Create MCP tool instances
+        tools = []
+        for server_config in server_params:
+            mcp_tools = await create_mcp_server_tools(
+                StdioServerParams(**server_config)
+            )
+            tools.extend(mcp_tools)
+            
+        return tools
+
+# MCP Resource Management
+class MCPResourceManager:
+    """Manage MCP resources and caching for performance"""
+    
+    def __init__(self):
+        self.cache = Redis(host='localhost', port=6379, db=1)
+        self.cache_ttl = {
+            "weather": 1800,  # 30 minutes
+            "energy_readings": 300,  # 5 minutes  
+            "building_metadata": 3600,  # 1 hour
+            "forecasts": 900,  # 15 minutes
+            "bdg2_data": 7200  # 2 hours
+        }
+    
+    async def cached_mcp_call(self, tool_name: str, **kwargs) -> Dict:
+        """Execute MCP tool call with intelligent caching"""
+        
+        # Generate cache key
+        cache_key = f"mcp:{tool_name}:{hash(str(sorted(kwargs.items())))}"
+        
+        # Check cache first
+        cached_result = await self.cache.get(cache_key)
+        if cached_result:
+            return json.loads(cached_result)
+        
+        # Execute MCP tool call
+        result = await execute_mcp_tool(tool_name, **kwargs)
+        
+        # Cache result with appropriate TTL
+        category = tool_name.split('_')[0]
+        ttl = self.cache_ttl.get(category, 300)
+        await self.cache.setex(cache_key, ttl, json.dumps(result))
+        
+        return result
+```
+
+## Layer 4: Multi-Agent Framework (LangGraph + LangChain)
+
+### LangGraph Agent Orchestration
+```python
+from langgraph.graph import StateGraph, END
+from langgraph.prebuilt import ToolExecutor
+from langchain.memory import ConversationBufferWindowMemory
+from langchain.agents import AgentExecutor
+from langsmith import Client as LangSmithClient
+
+class EAIOAgentFramework:
+    """LangGraph-based multi-agent framework for EAIO"""
+    
+    def __init__(self):
+        self.langsmith_client = LangSmithClient()
+        self.graph = self._build_agent_graph()
+        self.memory_manager = EAIOMemoryManager()
+        
+    def _build_agent_graph(self) -> StateGraph:
+        """Build LangGraph workflow for EAIO agents"""
+        
+        # Define agent state
+        class AgentState(TypedDict):
+            messages: List[BaseMessage]
+            building_context: Dict
+            analysis_results: Dict
+            recommendations: List[Dict]
+            user_role: str
+            conversation_id: str
+            
+        # Create state graph
+        workflow = StateGraph(AgentState)
+        
+        # Add agent nodes
+        workflow.add_node("coordinator", self._coordinator_agent)
+        workflow.add_node("data_intelligence", self._data_intelligence_agent)  
+        workflow.add_node("optimization_strategist", self._optimization_strategist_agent)
+        workflow.add_node("forecast_intelligence", self._forecast_intelligence_agent)
+        workflow.add_node("control_coordination", self._control_coordination_agent)
+        workflow.add_node("response_synthesizer", self._response_synthesizer_agent)
+        
+        # Define workflow edges
+        workflow.set_entry_point("coordinator")
+        
+        workflow.add_conditional_edges(
+            "coordinator",
+            self._route_to_specialist,
+            {
+                "data_analysis": "data_intelligence",
+                "optimization": "optimization_strategist", 
+                "forecasting": "forecast_intelligence",
+                "control": "control_coordination",
+                "synthesis": "response_synthesizer"
+            }
+        )
+        
+        # Specialist agents route to synthesizer
+        for agent in ["data_intelligence", "optimization_strategist", 
+                     "forecast_intelligence", "control_coordination"]:
+            workflow.add_edge(agent, "response_synthesizer")
+            
+        workflow.add_edge("response_synthesizer", END)
+        
+        return workflow.compile()
+    
+    async def _coordinator_agent(self, state: AgentState) -> AgentState:
+        """Central coordinator agent using LangChain with MCP tools"""
+        
+        # Setup LangChain agent with MCP tools
+        mcp_tools = await self.mcp_layer.setup_mcp_tools("coordinator")
+        
+        # Create LangChain agent with memory
+        memory = ConversationBufferWindowMemory(
+            k=10,
+            return_messages=True,
+            memory_key="chat_history"
+        )
+        
+        agent = create_structured_chat_agent(
+            llm=self.hybrid_llm_router.get_llm("coordinator"),
+            tools=mcp_tools,
+            memory=memory,
+            verbose=True
+        )
+        
+        # Execute with LangSmith tracing
+        with self.langsmith_client.trace("coordinator_analysis"):
+            result = await agent.ainvoke({
+                "input": state["messages"][-1].content,
+                "building_context": state["building_context"],
+                "user_role": state["user_role"]
+            })
+        
+        # Update state
+        state["messages"].append(AIMessage(content=result["output"]))
+        return state
+
+    async def _data_intelligence_agent(self, state: AgentState) -> AgentState:
+        """Data Intelligence Agent with BDG2 integration"""
+        
+        # Setup specialized tools for data analysis
+        mcp_tools = await self.mcp_layer.setup_mcp_tools("data_intelligence")
+        
+        # Long-term memory for building patterns
+        building_memory = await self.memory_manager.get_building_memory(
+            state["building_context"]["building_id"]
+        )
+        
+        # Create specialized LangChain agent
+        agent = create_json_agent(
+            llm=self.hybrid_llm_router.get_llm("data_analysis"),
+            tools=mcp_tools,
+            verbose=True
+        )
+        
+        with self.langsmith_client.trace("data_intelligence_analysis"):
+            result = await agent.ainvoke({
+                "input": f"""
+                Analyze energy consumption for building {state['building_context']['building_id']}.
+                Consider historical patterns from BDG2 data and current readings.
+                Building memory: {building_memory}
+                """,
+                "building_context": state["building_context"]
+            })
+        
+        # Store analysis results
+        state["analysis_results"]["data_intelligence"] = result
+        
+        # Update long-term memory
+        await self.memory_manager.update_building_memory(
+            state["building_context"]["building_id"],
+            result["analysis"]
+        )
+        
+        return state
+
+# LangChain Memory Integration
+class EAIOMemoryManager:
+    """Advanced memory management for EAIO agents"""
+    
+    def __init__(self):
+        self.milvus_client = MilvusClient(uri="http://localhost:19530")
+        self.short_term_memory = {}  # Redis-backed
+        self.embeddings = OpenAIEmbeddings()
+        
+    async def get_building_memory(self, building_id: str) -> Dict:
+        """Retrieve long-term memory for specific building"""
+        
+        # Query Milvus for building-specific patterns
+        query_vector = await self.embeddings.aembed_query(f"building_{building_id}_patterns")
+        
+        results = self.milvus_client.search(
+            collection_name="building_memory",
+            data=[query_vector],
+            filter=f'building_id == "{building_id}"',
+            limit=5,
+            output_fields=["memory_content", "timestamp", "confidence"]
+        )
+        
+        return {
+            "historical_patterns": [r["entity"]["memory_content"] for r in results[0]],
+            "last_updated": max([r["entity"]["timestamp"] for r in results[0]] or [None])
+        }
+    
+    async def update_building_memory(self, building_id: str, analysis: Dict):
+        """Update long-term memory with new insights"""
+        
+        # Create embedding for new insight
+        insight_text = f"Building {building_id}: {analysis['summary']}"
+        embedding = await self.embeddings.aembed_query(insight_text)
+        
+        # Store in Milvus
+        self.milvus_client.insert(
+            collection_name="building_memory",
+            data=[{
+                "id": f"{building_id}_{int(time.time())}",
+                "building_id": building_id,
+                "memory_content": insight_text,
+                "embedding": embedding,
+                "timestamp": time.time(),
+                "confidence": analysis.get("confidence", 0.8)
+            }]
+        )
+    
+    def get_short_term_memory(self, conversation_id: str) -> ConversationBufferWindowMemory:
+        """Get conversation-specific short-term memory"""
+        
+        if conversation_id not in self.short_term_memory:
+            self.short_term_memory[conversation_id] = ConversationBufferWindowMemory(
+                k=20,  # Keep last 20 exchanges
+                return_messages=True,
+                memory_key="chat_history"
+            )
+            
+        return self.short_term_memory[conversation_id]
+
+# LangSmith Integration for Monitoring
+class LangSmithMonitoring:
+    """LangSmith integration for agent performance monitoring"""
+    
+    def __init__(self):
+        self.client = LangSmithClient()
+        self.project_name = "eaio-multi-agent"
+        
+    async def trace_agent_interaction(self, agent_name: str, input_data: Dict, output_data: Dict):
+        """Trace individual agent interactions"""
+        
+        with self.client.trace(
+            name=f"{agent_name}_interaction",
+            project_name=self.project_name,
+            inputs=input_data,
+            outputs=output_data
+        ) as trace:
+            # Add custom metadata
+            trace.metadata = {
+                "agent_type": agent_name,
+                "building_id": input_data.get("building_context", {}).get("building_id"),
+                "user_role": input_data.get("user_role"),
+                "response_time": output_data.get("response_time"),
+                "token_usage": output_data.get("token_usage", {})
+            }
+            
+    async def log_multi_agent_workflow(self, workflow_id: str, state_history: List[Dict]):
+        """Log complete multi-agent workflow execution"""
+        
+        self.client.create_run(
+            name="multi_agent_workflow",
+            project_name=self.project_name,
+            inputs={"workflow_id": workflow_id},
+            outputs={"final_state": state_history[-1]},
+            run_type="chain",
+            extra={
+                "state_transitions": len(state_history),
+                "agents_involved": list(set([s.get("current_agent") for s in state_history])),
+                "total_duration": state_history[-1]["timestamp"] - state_history[0]["timestamp"]
+            }
+        )
+```
+
+## Integration Points
+
+### Agent-MCP Integration Matrix
+| Agent Type | Primary MCP Tools | Memory Type | LLM Provider |
+|------------|------------------|-------------|--------------|
+| Data Intelligence | energy_data, weather, bdg2 | Long-term + Vector | Local Llama-3.2-3B |
+| Optimization Strategist | ml_models, building_control | Short-term + Long-term | External DeepSeek-V3 |
+| Forecast Intelligence | ml_models, weather | Vector + Time-series | Hybrid routing |
+| Control Coordination | building_control, energy_data | Short-term | Local Qwen2.5-7B |
+
+### Performance Optimization
+- **MCP Tool Caching**: Redis-based caching with category-specific TTL
+- **Memory Management**: Automatic memory cleanup and optimization
+- **LLM Routing**: Intelligent routing based on task complexity and privacy
+- **State Persistence**: LangGraph state checkpointing for reliability
+
+### Error Handling & Resilience
+- **Circuit Breaker Pattern**: Automatic fallback for failed MCP servers
+- **Retry Logic**: Exponential backoff for transient failures
+- **Graceful Degradation**: Partial functionality when components unavailable
+- **Health Monitoring**: Continuous monitoring of all framework components 
