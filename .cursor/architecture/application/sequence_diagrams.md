@@ -164,7 +164,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant Agent as Any Agent
-    parameter MCPOrch as MCP Orchestrator
+    participant MCPOrch as MCP Orchestrator
     participant MCPServer1 as MCP Energy Server
     participant MCPServer2 as MCP Backup Server
     participant ToolReg as Tool Registry
@@ -318,7 +318,7 @@ sequenceDiagram
     participant User as User
     participant CE as Conversational Engine
     participant LLM as Local LLM
-    parameter CS as Context Store
+    participant CS as Context Store
     participant MS as Memory Store
 
     User->>+CE: "What was the consumption trend last month?"
