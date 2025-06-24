@@ -63,7 +63,23 @@ The Enhanced Energy AI Optimizer (EAIO) system integrates the **Building Data Ge
 - ⚠️ 2016-2017 data vintage considerations
 - ⚠️ North America/Europe geographic bias
 
-### ADR-006: Milvus Vector Database Selection
+### ADR-006: Hybrid LLM Architecture Selection
+**Decision**: Implement hybrid local + external LLM architecture with intelligent routing
+**Rationale**:
+- Privacy-first approach with local models for sensitive building data
+- Cost optimization through intelligent API routing and budget management
+- Best-of-breed capabilities: local privacy + external advanced reasoning
+- Automatic fallback ensures system reliability and availability
+
+**Trade-offs**:
+- ✅ Maximum privacy for sensitive data (local processing)
+- ✅ Access to advanced capabilities (GPT-4o, Gemini, DeepSeek)
+- ✅ Cost optimization through intelligent routing
+- ✅ High availability with local fallback
+- ⚠️ Increased complexity in LLM management
+- ⚠️ External API dependency for advanced features
+
+### ADR-007: Milvus Vector Database Selection
 **Decision**: Use Milvus for vector similarity search and agent memory
 **Rationale**:
 - Production-scale vector database with proven performance
@@ -79,7 +95,7 @@ The Enhanced Energy AI Optimizer (EAIO) system integrates the **Building Data Ge
 - ⚠️ Higher resource requirements than ChromaDB
 - ⚠️ Additional operational complexity
 
-### ADR-007: Next.js + Streamlit Frontend Architecture
+### ADR-008: Next.js + Streamlit Frontend Architecture
 **Decision**: Hybrid frontend with Next.js for dashboards and Streamlit for analytics
 **Rationale**:
 - Next.js provides modern full-stack capabilities with optimal performance
@@ -156,6 +172,9 @@ The Enhanced Energy AI Optimizer (EAIO) system integrates the **Building Data Ge
 
 | Category | Selected Technology | Alternative | BDG2 Rationale |
 |----------|-------------------|-------------|----------------|
+| **LLM Architecture** | Hybrid Local + API | Local Only | Privacy + advanced capabilities, cost optimization |
+| **Local LLM** | Ollama + Qwen2.5/Llama3.2 | LM Studio | M1 optimization, privacy compliance |
+| **External LLM** | OpenAI + DeepSeek + Gemini | Anthropic Claude | Best capabilities per use case |
 | **Primary Database** | PostgreSQL + TimescaleDB | InfluxDB | ACID compliance, complex queries, BDG2 metadata |
 | **Vector Database** | Milvus | ChromaDB | Production scale, advanced indexing, similarity search |
 | **Frontend Framework** | Next.js + Streamlit | React + Plotly | Full-stack + analytics specialization |

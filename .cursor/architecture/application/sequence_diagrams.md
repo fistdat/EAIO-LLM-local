@@ -195,7 +195,64 @@ sequenceDiagram
     end
 ```
 
-### 5. Local LLM Model Loading & Resource Management
+### 5. Hybrid LLM Request Routing & Fallback
+
+```mermaid
+sequenceDiagram
+    participant Agent as Energy Agent
+    participant LLMRouter as Hybrid LLM Router
+    participant LocalOllama as Local Ollama
+    participant OpenAI as OpenAI API
+    participant DeepSeek as DeepSeek API
+    participant Gemini as Gemini API
+    participant CostTracker as Cost Tracker
+    participant PrivacyFilter as Privacy Filter
+
+    Agent->>+LLMRouter: llm_request(query, privacy=PRIVATE, complexity=0.8)
+    LLMRouter->>+PrivacyFilter: check_privacy_constraints(query, PRIVATE)
+    PrivacyFilter-->>-LLMRouter: privacy_level=LOCAL_ONLY
+    
+    alt Privacy Level = LOCAL_ONLY
+        LLMRouter->>+LocalOllama: generate(query, model=qwen2.5-7b)
+        LocalOllama-->>-LLMRouter: response(text, tokens=150, cost=0)
+        LLMRouter-->>-Agent: llm_response(text, provider=local)
+        
+    else Privacy Level = ENHANCED
+        LLMRouter->>+CostTracker: check_budget_availability()
+        CostTracker-->>-LLMRouter: remaining_budget=$500
+        
+        alt Complexity > 0.7 AND Budget Available
+            LLMRouter->>LLMRouter: select_optimal_api(complexity, cost, domain)
+            
+            par API Selection
+                LLMRouter->>+DeepSeek: generate(anonymized_query)
+                DeepSeek-->>-LLMRouter: response(text, tokens=200, cost=$0.03)
+            and Fallback Ready
+                Note over LocalOllama: Standby for API failure
+            end
+            
+            LLMRouter->>+CostTracker: record_usage(DeepSeek, $0.03)
+            CostTracker-->>-LLMRouter: usage_recorded
+            
+        else Budget Exhausted OR Low Complexity
+            LLMRouter->>+LocalOllama: generate(query, model=llama3.2-3b)
+            LocalOllama-->>-LLMRouter: response(text, tokens=120, cost=0)
+        end
+        
+        LLMRouter-->>-Agent: llm_response(text, provider=deepseek)
+        
+    else API Failure Scenario
+        LLMRouter->>+OpenAI: generate(anonymized_query)
+        OpenAI-->>LLMRouter: api_error(rate_limit_exceeded)
+        
+        Note over LLMRouter: Automatic fallback to local
+        LLMRouter->>+LocalOllama: generate(query, model=qwen2.5-7b)
+        LocalOllama-->>-LLMRouter: response(text, tokens=180, cost=0)
+        LLMRouter-->>-Agent: llm_response(text, provider=local_fallback)
+    end
+```
+
+### 6. Local LLM Model Loading & Resource Management
 
 ```mermaid
 sequenceDiagram

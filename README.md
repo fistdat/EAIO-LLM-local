@@ -13,7 +13,7 @@ EAIO (Energy AI Optimizer) is an enterprise-grade building energy management sys
 ### ✨ Key Features
 
 - 🏢 **Real-World Validation**: Built on [Building Data Genome Project 2 (BDG2)](https://github.com/buds-lab/building-data-genome-project-2) dataset with 53.6M data points from 1,636 buildings
-- 🧠 **Local AI Intelligence**: Privacy-first deployment with optimized LLM models on Apple M1 hardware
+- 🧠 **Hybrid AI Intelligence**: Privacy-first local LLM + external APIs (OpenAI, DeepSeek, Gemini) with intelligent routing
 - 📊 **Enterprise Technology Stack**: PostgreSQL + TimescaleDB + Milvus + Next.js + Streamlit
 - 🎖️ **Industry Proven**: ASHRAE GEPIII competition-validated forecasting algorithms
 - ⚡ **Performance Optimized**: <100ms database queries, <50ms vector searches, <3min anomaly detection
@@ -55,10 +55,11 @@ Ready for implementation with complete architectural foundation and validated te
 
 ## 💻 Technology Stack
 
-### 🧠 **Local AI Infrastructure**
-- **Primary LLM**: Llama-3.2-3B (M1 optimized, 3GB RAM)
-- **Specialized Models**: Qwen2.5-7B for complex analysis
-- **Inference Engine**: Ollama with GGUF quantization
+### 🧠 **Hybrid AI Infrastructure**
+- **Local Models**: Llama-3.2-3B, Qwen2.5-7B (M1 optimized, privacy-first)
+- **External APIs**: OpenAI GPT-4o, DeepSeek, Google Gemini (advanced capabilities)
+- **Intelligent Routing**: Privacy-based, cost-optimized, domain-aware selection
+- **Inference Engine**: Ollama for local + unified API client for external
 - **Vector Embeddings**: all-MiniLM-L6-v2 (384 dimensions)
 
 ### 🗄️ **Data Platform**

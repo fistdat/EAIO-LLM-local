@@ -34,10 +34,11 @@ This directory contains the complete architectural documentation for the Energy 
 - Industry-standard building classifications and benchmarks
 
 ### ✅ **Enterprise Technology Stack** 
+- **Hybrid LLM Architecture**: Local Ollama + External APIs (OpenAI, DeepSeek, Gemini)
 - **PostgreSQL + TimescaleDB**: Enterprise time-series database
 - **Milvus Vector Database**: Production-scale similarity search
 - **Next.js + Streamlit**: Modern full-stack and analytics interfaces
-- **Local LLM Deployment**: Privacy-first AI with Ollama optimization
+- **Privacy-First AI**: Local processing for sensitive data, APIs for advanced capabilities
 
 ### ✅ **Performance Validated**
 - <100ms PostgreSQL queries with 53.6M real data points

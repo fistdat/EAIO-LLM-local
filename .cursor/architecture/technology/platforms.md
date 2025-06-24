@@ -1,621 +1,453 @@
 # EAIO Technology Platform Architecture
-**Architecture Mode (A.*) - BDG2 Enhanced Technology Stack**
+**Architecture Mode (A.*) - Hybrid LLM Technology Stack with BDG2 Integration**
 
 ## 🎯 Executive Summary
 
-The enhanced EAIO technology platform integrates **Milvus vector database**, **PostgreSQL with BDG2 schema**, and **Next.js + Streamlit** frontend architecture, providing enterprise-grade performance while maintaining local-first deployment principles for MacBook Pro M1 optimization.
+The EAIO technology platform supports **hybrid LLM deployment** combining **local privacy-first models** with **external API services** (ChatGPT, DeepSeek, Gemini), optimized for **MacBook Pro M1 hardware** while providing enterprise-scale energy management capabilities with flexible AI service selection.
 
-## 💻 Updated Hardware Architecture
+## 🧠 Hybrid LLM Infrastructure
 
-### MacBook Pro M1 Resource Allocation (16GB RAM)
+### LLM Service Architecture Strategy
 ```yaml
-Enhanced Resource Strategy:
-  System + macOS: 3GB (18.75%)
-  Primary LLM Model: 6-8GB (37.5-50%)
-  PostgreSQL + Milvus: 3GB (18.75%)  
-  Next.js + Streamlit: 1GB (6.25%)
-  Redis Cache: 512MB (3.125%)
-  Application Logic: 2-2.5GB (12.5-15.6%)
+Hybrid LLM Deployment:
+  Primary Strategy: Local-first with API fallback
+  Privacy Levels: 
+    - PRIVATE: Local LLM only (sensitive building data)
+    - ENHANCED: External API allowed (aggregated insights)
+    - PUBLIC: External API preferred (general analysis)
   
-Optimized Memory Management:
-  - Lazy loading for Streamlit analytics
-  - Connection pooling for PostgreSQL
-  - Milvus index caching optimization
-  - Next.js static generation for performance
+Cost Optimization:
+  - Local LLM: Zero per-token cost, hardware investment
+  - External APIs: Pay-per-use, premium capabilities
+  - Intelligent routing based on query complexity and privacy
 ```
 
-## 🗄️ PostgreSQL Database Stack
+### 🏠 Local LLM Stack (Primary)
 
-### Enterprise PostgreSQL Configuration
+#### Model Selection Matrix
+| Model | Size | RAM Usage | Tokens/sec | Use Case | Privacy Level |
+|-------|------|-----------|------------|----------|---------------|
+| **Llama-3.2-3B-Instruct** | 3B | 3GB | 45-60 | Real-time ops, private data | HIGH |
+| **Qwen2.5-7B-Instruct** | 7B | 7GB | 25-35 | Complex analysis, planning | HIGH |
+| **DeepSeek-Coder-6.7B** | 6.7B | 6GB | 30-40 | Code generation, debugging | HIGH |
+| **Phi-3-Mini-4K** | 3.8B | 4GB | 50-65 | Fast responses, simple tasks | HIGH |
+
+#### Local Infrastructure
 ```yaml
-PostgreSQL Version: 15+ with Extensions
-Core Extensions:
-  - TimescaleDB: Time-series optimization for meter readings
-  - PostGIS: Geospatial data for building locations
-  - pg_stat_statements: Query performance monitoring
-  - pgcrypto: Data encryption capabilities
-  
-Configuration for M1 MacBook Pro:
-  shared_buffers: 1GB
-  effective_cache_size: 2GB  
-  work_mem: 64MB
-  maintenance_work_mem: 256MB
-  max_connections: 50
-  
-Performance Optimizations:
-  - Partitioned tables for meter_readings by month
-  - Materialized views for aggregated analytics
-  - Parallel query execution enabled
-  - Automatic vacuum tuning
+Primary Inference Engine: Ollama v0.3+
+  Advantages:
+    - Native M1 optimization
+    - GGUF format support
+    - Built-in model management
+    - OpenAI-compatible API
+    - Zero external data sharing
+    
+Performance Characteristics:
+  - Cold start: 5-15 seconds
+  - Warm inference: 20-100 tokens/sec
+  - Context window: 4K-32K tokens
+  - Concurrent requests: 1-2 (M1 16GB limitation)
+    
+Privacy Benefits:
+  - 100% local processing
+  - No data transmission
+  - Complete control over model versions
+  - Regulatory compliance (GDPR, CCPA)
 ```
 
-### BDG2-Enhanced Database Schema
-```sql
--- Enhanced buildings table with BDG2 integration
-CREATE TABLE buildings (
-    id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    bdg2_site_id            INTEGER,
-    bdg2_building_id        INTEGER,
-    
-    -- Core Building Information
-    name                    VARCHAR(255) NOT NULL,
-    address                 TEXT,
-    city                    VARCHAR(100),
-    state_province          VARCHAR(50),
-    country                 VARCHAR(50),
-    postal_code             VARCHAR(20),
-    timezone                VARCHAR(50) NOT NULL,
-    
-    -- BDG2 Classification
-    primary_use             building_use_type NOT NULL,
-    sub_primary_use         VARCHAR(100),
-    industry                industry_type,
-    sub_industry            VARCHAR(100),
-    
-    -- Physical Characteristics  
-    gross_floor_area        INTEGER, -- square feet
-    floor_count             INTEGER,
-    year_built              INTEGER,
-    year_renovated          INTEGER,
-    
-    -- Energy Infrastructure
-    energy_sources          TEXT[], -- Array of energy types
-    has_renewable           BOOLEAN DEFAULT FALSE,
-    
-    -- Operational Information
-    operating_hours         JSONB, -- Flexible schedule storage
-    occupancy_type          VARCHAR(50),
-    
-    -- Geospatial (PostGIS)
-    location                GEOMETRY(POINT, 4326),
-    
-    -- Metadata
-    created_at              TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at              TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    
-    -- BDG2 Compatibility
-    UNIQUE(bdg2_site_id, bdg2_building_id)
-);
+### 🌐 External LLM API Integration
 
--- Custom ENUM types
-CREATE TYPE building_use_type AS ENUM (
-    'Office', 'Education', 'Lodging/residential',
-    'Entertainment/public assembly', 'Retail', 'Healthcare', 
-    'Public services', 'Warehouse/storage', 'Food sales & service',
-    'Religious worship', 'Manufacturing', 'Technology/science'
-);
-
-CREATE TYPE industry_type AS ENUM (
-    'Education Services', 'Professional/Technical Services',
-    'Healthcare/Social Assistance', 'Public Administration',
-    'Accommodation/Food Services', 'Retail Trade', 
-    'Manufacturing', 'Information Technology'
-);
-
--- TimescaleDB hypertable for meter readings
-CREATE TABLE meter_readings (
-    time                    TIMESTAMP WITH TIME ZONE NOT NULL,
-    meter_id                UUID NOT NULL,
-    building_id             UUID NOT NULL,
-    
-    -- Energy Measurements
-    value                   DECIMAL(12,4) NOT NULL,
-    unit                    VARCHAR(10) NOT NULL DEFAULT 'kWh',
-    meter_type              meter_type_enum NOT NULL,
-    
-    -- Data Quality
-    quality_code            quality_enum DEFAULT 'GOOD',
-    is_estimated            BOOLEAN DEFAULT FALSE,
-    anomaly_score           DECIMAL(5,4),
-    
-    -- Weather Context (denormalized for performance)
-    air_temperature         DECIMAL(6,2),
-    humidity                DECIMAL(5,2),
-    wind_speed              DECIMAL(5,2),
-    cloud_coverage          DECIMAL(3,1),
-    
-    -- Constraints
-    FOREIGN KEY (building_id) REFERENCES buildings(id),
-    FOREIGN KEY (meter_id) REFERENCES energy_meters(id)
-);
-
--- Convert to TimescaleDB hypertable
-SELECT create_hypertable('meter_readings', 'time');
-
--- Create continuous aggregates for performance
-CREATE MATERIALIZED VIEW meter_readings_hourly
-WITH (timescaledb.continuous) AS
-SELECT 
-    time_bucket('1 hour', time) AS time_hour,
-    meter_id,
-    building_id,
-    meter_type,
-    AVG(value) AS avg_value,
-    MAX(value) AS max_value,
-    MIN(value) AS min_value,
-    COUNT(*) AS sample_count
-FROM meter_readings
-GROUP BY time_hour, meter_id, building_id, meter_type;
-
-CREATE MATERIALIZED VIEW meter_readings_daily  
-WITH (timescaledb.continuous) AS
-SELECT 
-    time_bucket('1 day', time_hour) AS time_day,
-    meter_id,
-    building_id, 
-    meter_type,
-    AVG(avg_value) AS avg_value,
-    MAX(max_value) AS peak_value,
-    MIN(min_value) AS min_value,
-    SUM(avg_value) AS total_consumption
-FROM meter_readings_hourly
-GROUP BY time_day, meter_id, building_id, meter_type;
-```
-
-## 🧠 Milvus Vector Database Integration
-
-### Milvus Deployment Configuration
+#### Supported API Providers
 ```yaml
-Milvus Version: 2.3+ (Standalone Mode)
-Deployment: Docker container with persistent storage
-Configuration:
-  Memory Limit: 2GB
-  CPU Limit: 4 cores (M1 performance cores)
-  Storage: 50GB SSD allocation
+Tier 1 Providers (Production Ready):
+  OpenAI:
+    Models: 
+      - gpt-4o: Advanced reasoning, multimodal
+      - gpt-4o-mini: Cost-effective, fast
+      - gpt-3.5-turbo: High-speed, affordable
+    API: REST + Streaming
+    Cost: $0.50-$60 per 1M tokens
+    Use Cases: Complex analysis, creative solutions
+    
+  DeepSeek API:
+    Models:
+      - deepseek-chat: General purpose, cost-effective
+      - deepseek-coder: Specialized code generation
+      - deepseek-reasoning: Advanced logical reasoning
+    API: OpenAI-compatible REST
+    Cost: $0.14-$2.00 per 1M tokens
+    Use Cases: Technical analysis, energy algorithms
+    
+  Google Gemini:
+    Models:
+      - gemini-1.5-pro: Advanced reasoning, large context
+      - gemini-1.5-flash: Fast responses, multimodal
+      - gemini-2.0-flash-exp: Latest experimental features
+    API: REST with Vertex AI integration
+    Cost: $1.25-$7.00 per 1M tokens
+    Use Cases: Data analysis, pattern recognition
+
+Tier 2 Providers (Future Integration):
+  Anthropic Claude: 
+    - claude-3.5-sonnet: Excellent for technical writing
+    - claude-3-haiku: Fast, cost-effective
   
-Collections Strategy:
-  - building_patterns: Energy consumption patterns
-  - anomaly_signatures: Anomaly detection embeddings  
-  - agent_memory: AI agent learning and context
-  - user_interactions: Conversation context and preferences
-  
-Vector Dimensions: 384 (all-MiniLM-L6-v2 embeddings)
-Index Type: HNSW for optimal M1 performance
-Distance Metric: COSINE similarity
+  Mistral AI:
+    - mistral-large: European data compliance
+    - mistral-medium: Balanced performance/cost
 ```
 
-### Milvus Schema Design
+#### API Integration Architecture
 ```python
-from pymilvus import Collection, FieldSchema, CollectionSchema, DataType, connections
-
-# Connect to local Milvus instance
-connections.connect("default", host="localhost", port="19530")
-
-# Building energy patterns collection
-building_patterns_fields = [
-    FieldSchema(name="id", dtype=DataType.INT64, is_primary=True, auto_id=True),
-    FieldSchema(name="building_id", dtype=DataType.VARCHAR, max_length=100),
-    FieldSchema(name="pattern_type", dtype=DataType.VARCHAR, max_length=50),
-    FieldSchema(name="time_period", dtype=DataType.VARCHAR, max_length=20),
-    FieldSchema(name="consumption_pattern", dtype=DataType.FLOAT_VECTOR, dim=384),
-    FieldSchema(name="weather_correlation", dtype=DataType.FLOAT_VECTOR, dim=384),
-    FieldSchema(name="confidence_score", dtype=DataType.DOUBLE),
-    FieldSchema(name="building_type", dtype=DataType.VARCHAR, max_length=50),
-    FieldSchema(name="created_timestamp", dtype=DataType.INT64),
-]
-
-building_patterns_schema = CollectionSchema(
-    building_patterns_fields, 
-    "Building energy consumption patterns and correlations"
-)
-building_patterns = Collection("building_patterns", building_patterns_schema)
-
-# Create HNSW index for optimal search performance
-index_params = {
-    "metric_type": "COSINE",
-    "index_type": "HNSW", 
-    "params": {"M": 8, "efConstruction": 64}
-}
-building_patterns.create_index("consumption_pattern", index_params)
-building_patterns.create_index("weather_correlation", index_params)
-
-# Agent memory collection for persistent learning
-agent_memory_fields = [
-    FieldSchema(name="id", dtype=DataType.INT64, is_primary=True, auto_id=True),
-    FieldSchema(name="agent_id", dtype=DataType.VARCHAR, max_length=50),
-    FieldSchema(name="memory_type", dtype=DataType.VARCHAR, max_length=30),
-    FieldSchema(name="context_embedding", dtype=DataType.FLOAT_VECTOR, dim=384),
-    FieldSchema(name="decision_embedding", dtype=DataType.FLOAT_VECTOR, dim=384),
-    FieldSchema(name="outcome_score", dtype=DataType.DOUBLE),
-    FieldSchema(name="building_context", dtype=DataType.VARCHAR, max_length=100),
-    FieldSchema(name="timestamp", dtype=DataType.INT64),
-    FieldSchema(name="success_metric", dtype=DataType.DOUBLE),
-]
-
-agent_memory_schema = CollectionSchema(
-    agent_memory_fields,
-    "AI agent learning memory and decision history"
-)
-agent_memory = Collection("agent_memory", agent_memory_schema)
-```
-
-### Milvus Integration Service
-```python
-class MilvusVectorService:
+# Hybrid LLM Service Router
+class HybridLLMService:
     def __init__(self):
-        connections.connect("default", host="localhost", port="19530")
-        self.embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
-        
-    async def store_building_pattern(
-        self, 
-        building_id: str, 
-        consumption_data: List[float],
-        weather_data: List[float]
-    ):
-        """Store building energy pattern in Milvus"""
-        
-        # Generate embeddings
-        consumption_text = self.create_consumption_description(consumption_data)
-        weather_text = self.create_weather_description(weather_data) 
-        
-        consumption_embedding = self.embedding_model.encode([consumption_text])[0]
-        weather_embedding = self.embedding_model.encode([weather_text])[0]
-        
-        # Insert into Milvus
-        entities = [{
-            "building_id": building_id,
-            "pattern_type": "daily_profile",
-            "time_period": "24h",
-            "consumption_pattern": consumption_embedding.tolist(),
-            "weather_correlation": weather_embedding.tolist(), 
-            "confidence_score": 0.95,
-            "building_type": await self.get_building_type(building_id),
-            "created_timestamp": int(time.time() * 1000)
-        }]
-        
-        building_patterns.insert(entities)
-        building_patterns.flush()
-        
-    async def find_similar_buildings(
-        self, 
-        target_building_id: str, 
-        limit: int = 10
-    ) -> List[Dict]:
-        """Find buildings with similar energy patterns"""
-        
-        # Get target building pattern
-        target_pattern = await self.get_building_pattern(target_building_id)
-        
-        # Search for similar patterns
-        search_params = {"metric_type": "COSINE", "params": {"ef": 64}}
-        
-        results = building_patterns.search(
-            data=[target_pattern.consumption_pattern],
-            anns_field="consumption_pattern",
-            param=search_params,
-            limit=limit,
-            output_fields=["building_id", "building_type", "confidence_score"]
+        self.local_ollama = OllamaClient("http://localhost:11434")
+        self.openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        self.deepseek_client = OpenAI(
+            api_key=os.getenv("DEEPSEEK_API_KEY"),
+            base_url="https://api.deepseek.com"
         )
+        self.gemini_client = genai.GenerativeModel('gemini-1.5-pro')
         
-        return [
-            {
-                "building_id": hit.entity.get("building_id"),
-                "building_type": hit.entity.get("building_type"),
-                "similarity_score": hit.score,
-                "confidence": hit.entity.get("confidence_score")
-            }
-            for hit in results[0]
-        ]
+    async def route_request(self, query: LLMRequest) -> LLMResponse:
+        """Intelligent routing based on privacy, complexity, and cost"""
+        
+        # Privacy-first routing
+        if query.privacy_level == "PRIVATE":
+            return await self.local_ollama.generate(query)
+            
+        # Complexity-based routing
+        if query.complexity_score > 0.8:
+            if query.domain == "technical":
+                return await self.deepseek_client.generate(query)
+            elif query.domain == "analysis":
+                return await self.gemini_client.generate(query)
+            else:
+                return await self.openai_client.generate(query)
+                
+        # Cost-optimized routing
+        if query.cost_sensitivity == "low":
+            return await self.local_ollama.generate(query)
+        else:
+            return await self.select_cheapest_api(query)
+            
+    async def fallback_strategy(self, query: LLMRequest, failed_service: str):
+        """Fallback when primary service fails"""
+        if failed_service == "local":
+            return await self.deepseek_client.generate(query)  # Most cost-effective
+        else:
+            return await self.local_ollama.generate(query)  # Always available
 ```
 
-## 🌐 Enhanced Frontend Architecture
+### 🔄 LLM Service Selection Strategy
 
-### Next.js Application Architecture
+#### Decision Matrix
 ```yaml
-Next.js Configuration:
-  Version: Next.js 14+ with App Router
-  TypeScript: Strict mode enabled
-  Deployment: Static generation + ISR for performance
-  
-Key Features:
-  - Server-side rendering for dashboard pages
-  - Static generation for public pages
-  - API routes for backend integration
-  - Real-time WebSocket integration
-  - Progressive Web App capabilities
-  
-Directory Structure:
-  app/
-    ├── (dashboard)/          # Dashboard layout group
-    │   ├── buildings/        # Building management pages
-    │   ├── analytics/        # Analytics dashboard  
-    │   ├── agents/          # Agent monitoring
-    │   └── settings/        # System configuration
-    ├── api/                 # API routes
-    │   ├── buildings/       # Building CRUD operations
-    │   ├── metrics/         # Real-time metrics
-    │   ├── agents/          # Agent communication
-    │   └── auth/           # Authentication
-    ├── components/          # Reusable UI components
-    │   ├── charts/         # Energy visualization charts
-    │   ├── forms/          # Data input forms
-    │   ├── layouts/        # Page layouts
-    │   └── ui/             # Base UI components
-    └── lib/                # Utility libraries
-        ├── database/       # PostgreSQL client
-        ├── milvus/         # Vector DB client
-        ├── agents/         # AI agent integration
-        └── auth/           # Authentication logic
+Query Classification:
+  Building Data Analysis:
+    Privacy: HIGH → Local LLM only
+    Complexity: MEDIUM → Qwen2.5-7B local
+    Fallback: DeepSeek API for complex algorithms
+    
+  Energy Optimization Planning:
+    Privacy: MEDIUM → Local preferred, API allowed
+    Complexity: HIGH → GPT-4o or Gemini-1.5-pro
+    Cost Consideration: DeepSeek for technical calculations
+    
+  General User Queries:
+    Privacy: LOW → API preferred for best experience
+    Response Speed: HIGH → GPT-3.5-turbo or local Phi-3
+    
+  Code Generation:
+    Privacy: MEDIUM → DeepSeek-Coder local or API
+    Complexity: Variable → Route based on code complexity
+    
+Performance Requirements:
+  Real-time Monitoring: Local LLM only (<200ms)
+  Strategic Planning: External API allowed (<5s)
+  Batch Analysis: External API preferred (cost-effective)
+  Emergency Response: Local LLM only (reliability)
 ```
 
-### Streamlit Analytics Dashboard
+### 🔐 Security & Privacy Framework
+
+#### Data Classification & Routing
+```yaml
+Data Sensitivity Levels:
+  CRITICAL (Local Only):
+    - Individual building energy consumption
+    - Specific equipment performance data
+    - Proprietary optimization algorithms
+    - Real-time operational status
+    
+  SENSITIVE (Local Preferred):
+    - Aggregated building performance
+    - Anonymous pattern analysis
+    - General optimization strategies
+    - Benchmarking comparisons
+    
+  PUBLIC (API Allowed):
+    - Industry best practices research
+    - General energy efficiency concepts
+    - Weather correlation analysis
+    - Academic research insights
+
+Privacy Protection Measures:
+  - Automatic data anonymization for API calls
+  - Configurable privacy levels per building/client
+  - Audit logging for all external API usage
+  - Zero-trust principle for sensitive data
+```
+
+#### API Security Implementation
 ```python
-# Streamlit analytics application for advanced energy analysis
-import streamlit as st
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import pandas as pd
-import asyncio
-from datetime import datetime, timedelta
-
-class EAIOAnalyticsDashboard:
-    def __init__(self):
-        self.setup_page_config()
-        self.db_client = PostgreSQLClient()
-        self.vector_client = MilvusVectorService()
+# Secure API Integration
+class SecureAPIClient:
+    def __init__(self, provider: str):
+        self.provider = provider
+        self.encryption = Fernet(os.getenv(f"{provider}_ENCRYPTION_KEY"))
+        self.rate_limiter = AsyncLimiter(max_rate=100, time_period=60)
         
-    def setup_page_config(self):
-        st.set_page_config(
-            page_title="EAIO Analytics Dashboard",
-            page_icon="⚡",
-            layout="wide",
-            initial_sidebar_state="expanded"
-        )
+    async def secure_call(self, request: LLMRequest) -> LLMResponse:
+        # Data sanitization
+        sanitized_request = self.sanitize_sensitive_data(request)
         
-    def render_main_dashboard(self):
-        """Main analytics dashboard with BDG2 data integration"""
-        
-        st.title("⚡ Energy AI Optimizer Analytics")
-        st.markdown("Advanced analytics powered by BDG2 dataset and AI agents")
-        
-        # Sidebar controls
-        with st.sidebar:
-            st.header("Dashboard Controls")
-            
-            # Building selection with BDG2 metadata
-            buildings = self.get_available_buildings()
-            selected_buildings = st.multiselect(
-                "Select Buildings",
-                options=buildings,
-                default=buildings[:3] if len(buildings) >= 3 else buildings,
-                format_func=lambda x: f"{x['name']} ({x['primary_use']})"
+        # Rate limiting
+        async with self.rate_limiter:
+            # Encrypted transmission
+            encrypted_payload = self.encryption.encrypt(
+                json.dumps(sanitized_request.dict()).encode()
             )
             
-            # Time range selection
-            time_range = st.selectbox(
-                "Time Range",
-                ["Last 24 Hours", "Last Week", "Last Month", "Last Quarter", "BDG2 Historical"]
-            )
+            # API call with retry logic
+            response = await self.call_with_retry(encrypted_payload)
             
-            # Analysis type
-            analysis_type = st.selectbox(
-                "Analysis Type",
-                ["Real-time Monitoring", "Pattern Analysis", "Anomaly Detection", 
-                 "BDG2 Benchmarking", "Agent Performance"]
-            )
-        
-        # Main content area
-        if analysis_type == "Real-time Monitoring":
-            self.render_realtime_monitoring(selected_buildings, time_range)
-        elif analysis_type == "Pattern Analysis":
-            self.render_pattern_analysis(selected_buildings, time_range)
-        elif analysis_type == "BDG2 Benchmarking":
-            self.render_bdg2_benchmarking(selected_buildings)
-        elif analysis_type == "Agent Performance":
-            self.render_agent_performance()
+            # Response validation
+            validated_response = self.validate_response(response)
             
-    def render_realtime_monitoring(self, buildings, time_range):
-        """Real-time energy monitoring dashboard"""
-        
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            total_consumption = self.get_total_consumption(buildings, time_range)
-            st.metric(
-                "Total Consumption", 
-                f"{total_consumption:,.0f} kWh",
-                delta=f"{self.get_consumption_delta(buildings):+.1%}"
-            )
+            # Audit logging
+            await self.log_api_usage(request.id, self.provider, response.tokens_used)
             
-        with col2:
-            active_alerts = self.get_active_alerts(buildings)
-            st.metric("Active Alerts", active_alerts, delta="-2")
-            
-        with col3:
-            efficiency_score = self.get_efficiency_score(buildings)
-            st.metric("Efficiency Score", f"{efficiency_score:.1f}/10", delta="+0.3")
-            
-        with col4:
-            cost_savings = self.get_cost_savings(buildings)
-            st.metric("Today's Savings", f"${cost_savings:,.0f}", delta="+12%")
-        
-        # Real-time consumption chart
-        st.subheader("Real-time Energy Consumption")
-        consumption_data = self.get_realtime_data(buildings)
-        
-        fig = go.Figure()
-        for building in buildings:
-            building_data = consumption_data[consumption_data['building_id'] == building['id']]
-            fig.add_trace(go.Scatter(
-                x=building_data['timestamp'],
-                y=building_data['consumption'],
-                mode='lines+markers',
-                name=building['name'],
-                line=dict(width=2)
-            ))
-            
-        fig.update_layout(
-            title="Hourly Energy Consumption",
-            xaxis_title="Time",
-            yaxis_title="Consumption (kWh)",
-            hovermode='x unified'
-        )
-        st.plotly_chart(fig, use_container_width=True)
-        
-    def render_bdg2_benchmarking(self, selected_buildings):
-        """BDG2 dataset benchmarking analysis"""
-        
-        st.subheader("🏢 BDG2 Dataset Benchmarking")
-        st.markdown("Compare your buildings against the Building Data Genome Project 2 dataset")
-        
-        for building in selected_buildings:
-            with st.expander(f"📊 {building['name']} Benchmark Analysis"):
-                
-                # Get BDG2 peer comparison
-                peers = asyncio.run(
-                    self.vector_client.find_similar_buildings(building['id'])
-                )
-                
-                col1, col2 = st.columns(2)
-                
-                with col1:
-                    st.write("**Building Characteristics**")
-                    st.write(f"Primary Use: {building['primary_use']}")
-                    st.write(f"Floor Area: {building['gross_floor_area']:,} sq ft")
-                    st.write(f"Year Built: {building['year_built']}")
-                    
-                    # BDG2 peer buildings
-                    st.write("**Similar BDG2 Buildings**")
-                    peer_df = pd.DataFrame(peers)
-                    st.dataframe(peer_df, hide_index=True)
-                
-                with col2:
-                    # Performance comparison chart
-                    benchmark_data = self.get_benchmark_data(building['id'], peers)
-                    
-                    fig = go.Figure()
-                    fig.add_trace(go.Bar(
-                        name='Your Building',
-                        x=['Energy Intensity', 'Peak Demand', 'Load Factor'],
-                        y=[benchmark_data['your_building'][metric] for metric in 
-                           ['energy_intensity', 'peak_demand', 'load_factor']],
-                        marker_color='lightblue'
-                    ))
-                    fig.add_trace(go.Bar(
-                        name='BDG2 Peer Average',
-                        x=['Energy Intensity', 'Peak Demand', 'Load Factor'],
-                        y=[benchmark_data['peer_average'][metric] for metric in 
-                           ['energy_intensity', 'peak_demand', 'load_factor']],
-                        marker_color='orange'
-                    ))
-                    
-                    fig.update_layout(
-                        title="Performance vs BDG2 Peers",
-                        barmode='group'
-                    )
-                    st.plotly_chart(fig, use_container_width=True)
+            return validated_response
 ```
 
-### Real-time Dashboard Integration
-```typescript
-// Next.js real-time dashboard component
-'use client';
+## 💰 Cost Optimization Strategy
 
-import { useEffect, useState } from 'react';
-import { WebSocketProvider } from '@/lib/websocket';
-import { EnergyMetricsChart } from '@/components/charts/EnergyMetricsChart';
-import { AlertPanel } from '@/components/alerts/AlertPanel';
-import { BuildingSelector } from '@/components/selectors/BuildingSelector';
-
-interface RealTimeDashboardProps {
-  initialBuildings: Building[];
-}
-
-export default function RealTimeDashboard({ initialBuildings }: RealTimeDashboardProps) {
-  const [selectedBuildings, setSelectedBuildings] = useState<Building[]>(initialBuildings);
-  const [realTimeData, setRealTimeData] = useState<EnergyReading[]>([]);
-  const [alerts, setAlerts] = useState<Alert[]>([]);
-
-  useEffect(() => {
-    const ws = new WebSocketProvider('ws://localhost:8000/ws/realtime');
-    
-    ws.on('energy_reading', (data: EnergyReading) => {
-      setRealTimeData(prev => [...prev.slice(-100), data]); // Keep last 100 readings
-    });
-    
-    ws.on('anomaly_alert', (alert: Alert) => {
-      setAlerts(prev => [alert, ...prev.slice(0, 9)]); // Keep last 10 alerts
-    });
-    
-    return () => ws.disconnect();
-  }, [selectedBuildings]);
-
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
-      {/* Building Selection */}
-      <div className="lg:col-span-3">
-        <BuildingSelector
-          buildings={initialBuildings}
-          selected={selectedBuildings}
-          onChange={setSelectedBuildings}
-        />
-      </div>
-      
-      {/* Real-time Metrics */}
-      <div className="lg:col-span-2">
-        <EnergyMetricsChart 
-          data={realTimeData}
-          buildings={selectedBuildings}
-          timeRange="24h"
-        />
-      </div>
-      
-      {/* Alert Panel */}
-      <div className="lg:col-span-1">
-        <AlertPanel alerts={alerts} />
-      </div>
-    </div>
-  );
-}
-```
-
-## 📊 Performance Monitoring Stack
-
-### Enhanced Monitoring Configuration
+### Hybrid Cost Model
 ```yaml
-Monitoring Stack:
-  Application Metrics:
-    - Prometheus: PostgreSQL and Milvus metrics
-    - Grafana: Real-time dashboards
-    - Custom metrics: LLM inference time, vector search latency
-    
-  Database Monitoring:
-    - PostgreSQL: pg_stat_monitor extension
-    - Milvus: Built-in metrics endpoint
-    - TimescaleDB: Continuous aggregate performance
-    
-  Frontend Performance:
-    - Next.js: Built-in performance monitoring
-    - Streamlit: Custom performance tracking
-    - WebSocket: Connection quality metrics
-    
-Performance Targets:
-  - PostgreSQL query time: <100ms (95th percentile)
-  - Milvus vector search: <50ms (average)
-  - Next.js page load: <1s (initial), <200ms (navigation)
-  - Streamlit dashboard: <3s (initial load)
-  - WebSocket latency: <50ms (real-time updates)
+Local LLM Costs:
+  Hardware Investment: $2,000-4,000 (M1 MacBook Pro)
+  Electricity: ~$0.001 per query (negligible)
+  Maintenance: Software updates only
+  Scaling: Linear hardware investment
+  
+External API Costs (Per Month Estimates):
+  Light Usage (1K queries): $10-50
+  Medium Usage (10K queries): $100-500  
+  Heavy Usage (100K queries): $1,000-5,000
+  Enterprise Usage (1M queries): $10,000-50,000
+  
+Cost Optimization Rules:
+  - Simple queries → Local LLM (free)
+  - Complex analysis → DeepSeek API (cheapest)
+  - Creative tasks → OpenAI (best quality)
+  - Technical coding → DeepSeek Coder (specialized)
+  - Multimodal needs → Gemini (vision capabilities)
 ```
 
-This enhanced technology platform provides enterprise-grade capabilities while maintaining the local-first deployment model optimized for MacBook Pro M1 hardware constraints. 
+### Intelligent Cost Management
+```python
+class CostOptimizer:
+    def __init__(self):
+        self.monthly_budget = float(os.getenv("LLM_MONTHLY_BUDGET", "1000"))
+        self.cost_tracker = {}
+        self.provider_costs = {
+            "local": 0.0,
+            "openai": {"gpt-4o": 0.0025, "gpt-3.5-turbo": 0.0005},
+            "deepseek": {"deepseek-chat": 0.00014, "deepseek-coder": 0.00014},
+            "gemini": {"gemini-1.5-pro": 0.00125, "gemini-1.5-flash": 0.00035}
+        }
+        
+    async def select_cost_optimal_provider(self, query: LLMRequest) -> str:
+        current_spend = sum(self.cost_tracker.values())
+        remaining_budget = self.monthly_budget - current_spend
+        
+        # Budget emergency - use local only
+        if remaining_budget < self.monthly_budget * 0.1:
+            return "local"
+            
+        # Calculate cost-benefit for each provider
+        options = self.calculate_cost_benefit(query)
+        
+        # Select best option within budget
+        for provider, score in sorted(options.items(), key=lambda x: x[1], reverse=True):
+            estimated_cost = self.estimate_query_cost(query, provider)
+            if estimated_cost <= remaining_budget * 0.05:  # Max 5% of remaining budget per query
+                return provider
+                
+        return "local"  # Fallback to free option
+```
+
+## 📊 Performance Monitoring & Analytics
+
+### LLM Performance Metrics
+```yaml
+Local LLM Monitoring:
+  - Response time: <500ms target
+  - Token throughput: 20-60 tokens/sec
+  - Memory usage: <8GB sustained
+  - GPU utilization: <90% sustained
+  - Error rate: <1%
+  
+External API Monitoring:
+  - Response time: <3s target
+  - API availability: >99.9%
+  - Cost per query: Track against budget
+  - Rate limit utilization: <80%
+  - Quality scores: User feedback based
+  
+System Health Checks:
+  - Local model availability
+  - API key validity and quotas
+  - Network connectivity to API providers
+  - Failover system responsiveness
+```
+
+### Hybrid Performance Dashboard
+```python
+# Performance Analytics
+class LLMPerformanceMonitor:
+    def __init__(self):
+        self.metrics_store = TimescaleDB("llm_performance")
+        
+    async def track_request(self, request: LLMRequest, response: LLMResponse):
+        await self.metrics_store.insert({
+            "timestamp": datetime.utcnow(),
+            "provider": response.provider,
+            "model": response.model,
+            "response_time_ms": response.response_time,
+            "tokens_used": response.tokens_used,
+            "cost_usd": response.cost,
+            "quality_score": response.quality_score,
+            "privacy_level": request.privacy_level,
+            "query_complexity": request.complexity_score
+        })
+        
+    async def generate_optimization_report(self) -> Dict:
+        """Generate recommendations for LLM usage optimization"""
+        
+        metrics = await self.metrics_store.query("""
+            SELECT 
+                provider,
+                AVG(response_time_ms) as avg_response_time,
+                SUM(cost_usd) as total_cost,
+                AVG(quality_score) as avg_quality,
+                COUNT(*) as request_count
+            FROM llm_performance 
+            WHERE timestamp >= NOW() - INTERVAL '30 days'
+            GROUP BY provider
+        """)
+        
+        return {
+            "cost_optimization": self.analyze_cost_efficiency(metrics),
+            "performance_optimization": self.analyze_response_times(metrics),
+            "quality_optimization": self.analyze_quality_scores(metrics),
+            "recommendations": self.generate_recommendations(metrics)
+        }
+```
+
+## 🔧 Configuration Management
+
+### Environment Configuration
+```yaml
+# .env configuration for hybrid LLM setup
+LLM_STRATEGY=hybrid  # local, hybrid, api-only
+
+# Local LLM Configuration
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_DEFAULT_MODEL=llama3.2:3b-instruct-q4_K_M
+OLLAMA_KEEP_ALIVE=30m
+
+# External API Configuration
+OPENAI_API_KEY=sk-...
+OPENAI_ORG_ID=org-...
+DEEPSEEK_API_KEY=sk-...
+GOOGLE_API_KEY=AIza...
+
+# Cost Controls
+LLM_MONTHLY_BUDGET=1000.0
+COST_ALERT_THRESHOLD=0.8
+EMERGENCY_LOCAL_ONLY=false
+
+# Privacy Controls
+DEFAULT_PRIVACY_LEVEL=PRIVATE
+ALLOW_API_FOR_AGGREGATED=true
+AUDIT_ALL_API_CALLS=true
+
+# Performance Controls
+LOCAL_TIMEOUT_SEC=10
+API_TIMEOUT_SEC=30
+MAX_CONCURRENT_LOCAL=2
+MAX_CONCURRENT_API=10
+```
+
+### Dynamic Configuration
+```python
+# Runtime LLM configuration
+class LLMConfig:
+    def __init__(self):
+        self.load_config()
+        
+    def load_config(self):
+        self.strategy = os.getenv("LLM_STRATEGY", "hybrid")
+        self.monthly_budget = float(os.getenv("LLM_MONTHLY_BUDGET", "1000"))
+        self.default_privacy = os.getenv("DEFAULT_PRIVACY_LEVEL", "PRIVATE")
+        
+        # Provider availability check
+        self.available_providers = self.check_provider_availability()
+        
+    async def check_provider_availability(self) -> Dict[str, bool]:
+        """Check which LLM providers are currently available"""
+        availability = {}
+        
+        # Local Ollama check
+        try:
+            response = await self.ollama_client.list_models()
+            availability["local"] = len(response) > 0
+        except:
+            availability["local"] = False
+            
+        # API providers check
+        for provider in ["openai", "deepseek", "gemini"]:
+            availability[provider] = await self.check_api_availability(provider)
+            
+        return availability
+        
+    def get_optimal_provider(self, query: LLMRequest) -> str:
+        """Get the optimal provider for this specific query"""
+        
+        # Privacy constraints
+        if query.privacy_level == "PRIVATE":
+            return "local" if self.available_providers["local"] else None
+            
+        # Performance requirements  
+        if query.urgency == "HIGH":
+            if self.available_providers["local"]:
+                return "local"
+            return "openai"  # Fastest API
+            
+        # Cost optimization
+        if query.cost_sensitivity == "HIGH":
+            if self.available_providers["local"]:
+                return "local"
+            return "deepseek"  # Cheapest API
+            
+        # Quality requirements
+        if query.complexity_score > 0.8:
+            return "openai"  # Best quality for complex tasks
+            
+        return "local"  # Default to local when possible
+```
+
+This hybrid LLM architecture provides maximum flexibility while maintaining privacy, cost control, and performance optimization for the EAIO energy management system. 

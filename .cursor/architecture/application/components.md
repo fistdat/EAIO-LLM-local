@@ -72,16 +72,70 @@ interface DashboardEngine {
 - Interactive data exploration
 - Mobile-responsive design
 
-### Layer 2: Intelligent Agent Network
+### Layer 2: Hybrid LLM Infrastructure
 
-#### 2.1 Data Intelligence Agent
+#### 2.0 Hybrid LLM Router
+**Component ID**: LLM-001
+**Responsibility**: Intelligent routing between local and external LLM services
+```python
+class HybridLLMRouter:
+    def __init__(self, config: LLMConfig):
+        self.local_ollama = OllamaClient("http://localhost:11434")
+        self.openai_client = OpenAI(api_key=config.openai_key)
+        self.deepseek_client = OpenAI(
+            api_key=config.deepseek_key,
+            base_url="https://api.deepseek.com"
+        )
+        self.gemini_client = genai.GenerativeModel('gemini-1.5-pro')
+        self.cost_tracker = CostTracker(config.monthly_budget)
+        self.privacy_filter = PrivacyFilter()
+        
+    async def route_request(self, request: LLMRequest) -> LLMResponse:
+        # Privacy-first routing
+        privacy_level = await self.privacy_filter.classify(request)
+        if privacy_level == "PRIVATE":
+            return await self.local_ollama.generate(request)
+            
+        # Budget and complexity-based routing
+        if request.complexity_score > 0.8 and await self.cost_tracker.has_budget():
+            provider = self.select_optimal_api(request)
+            try:
+                response = await self.call_external_api(provider, request)
+                await self.cost_tracker.record_usage(provider, response.cost)
+                return response
+            except Exception as e:
+                # Fallback to local on API failure
+                return await self.local_ollama.generate(request)
+        else:
+            return await self.local_ollama.generate(request)
+            
+    def select_optimal_api(self, request: LLMRequest) -> str:
+        """Select best API based on domain, complexity, and cost"""
+        if request.domain == "technical":
+            return "deepseek"  # Best for technical/coding tasks
+        elif request.domain == "analysis":
+            return "gemini"    # Best for data analysis
+        else:
+            return "openai"    # Best general capability
+```
+
+**Key Features**:
+- Privacy-first routing (sensitive data stays local)
+- Cost optimization with budget tracking
+- Automatic fallback to local LLM
+- Provider selection based on task domain
+- Real-time availability monitoring
+
+### Layer 3: Intelligent Agent Network
+
+#### 3.1 Data Intelligence Agent
 **Component ID**: AGENT-001
 **Responsibility**: IoT data processing and quality assurance
 ```python
 class DataIntelligenceAgent:
-    def __init__(self, mcp_tools: MCPToolRegistry):
+    def __init__(self, mcp_tools: MCPToolRegistry, llm_router: HybridLLMRouter):
         self.tools = mcp_tools
-        self.model = "llama-3.2-3b-instruct"
+        self.llm_router = llm_router
         
     async def process_iot_stream(self, sensor_data: SensorReading):
         # Data validation and cleaning
@@ -101,14 +155,14 @@ class DataIntelligenceAgent:
 - `detect_anomalies`: Real-time anomaly detection
 - `calculate_quality_metrics`: Data quality assessment
 
-#### 2.2 Optimization Strategist Agent
+#### 3.2 Optimization Strategist Agent
 **Component ID**: AGENT-002  
 **Responsibility**: Energy optimization strategy development
 ```python
 class OptimizationStrategistAgent:
-    def __init__(self, mcp_tools: MCPToolRegistry):
+    def __init__(self, mcp_tools: MCPToolRegistry, llm_router: HybridLLMRouter):
         self.tools = mcp_tools
-        self.model = "qwen2.5-7b-instruct"  # Loaded on-demand
+        self.llm_router = llm_router
         
     async def develop_optimization_strategy(
         self, 
@@ -135,14 +189,14 @@ class OptimizationStrategistAgent:
 - `calculate_roi_projections`: Financial impact modeling
 - `assess_implementation_risks`: Risk analysis and mitigation
 
-#### 2.3 Forecast Intelligence Agent
+#### 3.3 Forecast Intelligence Agent
 **Component ID**: AGENT-003
 **Responsibility**: Energy consumption prediction and scenario modeling
 ```python
 class ForecastIntelligenceAgent:
-    def __init__(self, mcp_tools: MCPToolRegistry):
+    def __init__(self, mcp_tools: MCPToolRegistry, llm_router: HybridLLMRouter):
         self.tools = mcp_tools
-        self.model = "llama-3.2-3b-instruct"
+        self.llm_router = llm_router
         
     async def generate_energy_forecasts(
         self,
@@ -166,14 +220,14 @@ class ForecastIntelligenceAgent:
         return ForecastResult(base_forecast, scenarios, confidence_bands)
 ```
 
-#### 2.4 Control Coordination Agent
+#### 3.4 Control Coordination Agent
 **Component ID**: AGENT-004
 **Responsibility**: Safe autonomous control and human-agent coordination
 ```python
 class ControlCoordinationAgent:
-    def __init__(self, mcp_tools: MCPToolRegistry):
+    def __init__(self, mcp_tools: MCPToolRegistry, llm_router: HybridLLMRouter):
         self.tools = mcp_tools
-        self.model = "llama-3.2-3b-instruct"
+        self.llm_router = llm_router
         self.safety_constraints = SafetyBoundaries()
         
     async def execute_optimization_action(
@@ -201,9 +255,9 @@ class ControlCoordinationAgent:
         return ControlResult(result, validation)
 ```
 
-### Layer 3: MCP Integration Framework
+### Layer 4: MCP Integration Framework
 
-#### 3.1 MCP Server Orchestrator
+#### 4.1 MCP Server Orchestrator
 **Component ID**: MCP-001
 **Responsibility**: Manage and coordinate MCP server lifecycle
 ```typescript
@@ -248,9 +302,9 @@ interface ToolRegistry {
 }
 ```
 
-### Layer 4: Data & Model Management
+### Layer 5: Data & Model Management
 
-#### 4.1 Local Model Manager
+#### 5.1 Local Model Manager
 **Component ID**: DATA-001
 **Responsibility**: LLM model lifecycle and resource optimization
 ```python
@@ -279,7 +333,7 @@ class LocalModelManager:
         return least_used.name
 ```
 
-#### 4.2 Time-Series Data Engine
+#### 5.2 Time-Series Data Engine
 **Component ID**: DATA-002
 **Responsibility**: Optimized time-series data storage and retrieval
 ```python
@@ -309,7 +363,7 @@ class TimeSeriesEngine:
         return StorageResult(success=True, reading_id=validated_reading.id)
 ```
 
-#### 4.3 Agent Memory Store
+#### 5.3 Agent Memory Store
 **Component ID**: DATA-003
 **Responsibility**: Persistent agent memory and learning storage
 ```python
