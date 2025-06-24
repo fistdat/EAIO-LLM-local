@@ -1,0 +1,222 @@
+erDiagram
+    %% EAIO Physical Entity Relationship Diagram
+    %% Implementation-specific PostgreSQL + TimescaleDB design
+    
+    buildings {
+        uuid building_id PK "PRIMARY KEY DEFAULT gen_random_uuid()"
+        varchar_255 name "NOT NULL"
+        varchar_100 building_type "NOT NULL CHECK IN ('office', 'retail', 'hotel', 'warehouse', 'mixed_use')"
+        decimal_10_2 area_sqft "CHECK (area_sqft > 0)"
+        varchar_255 location "NOT NULL"
+        integer construction_year "CHECK (construction_year BETWEEN 1800 AND 2030)"
+        decimal_10_6 latitude "CHECK (latitude BETWEEN -90 AND 90)"
+        decimal_10_6 longitude "CHECK (longitude BETWEEN -180 AND 180)"
+        varchar_50 timezone "DEFAULT 'UTC'"
+        jsonb metadata "DEFAULT '{}'"
+        timestamptz created_at "DEFAULT NOW()"
+        timestamptz updated_at "DEFAULT NOW()"
+    }
+    
+    energy_meters {
+        uuid meter_id PK "PRIMARY KEY DEFAULT gen_random_uuid()"
+        uuid building_id FK "REFERENCES buildings(building_id) ON DELETE CASCADE"
+        varchar_50 meter_type "NOT NULL CHECK IN ('electricity', 'gas', 'steam', 'chilled_water')"
+        varchar_255 location_description
+        boolean is_active "DEFAULT true"
+        decimal_8_4 multiplier "DEFAULT 1.0 CHECK (multiplier > 0)"
+        varchar_20 units "DEFAULT 'kWh'"
+        timestamptz installed_date
+        timestamptz created_at "DEFAULT NOW()"
+        index idx_meters_building "INDEX (building_id)"
+        index idx_meters_type "INDEX (meter_type)"
+    }
+    
+    energy_consumption {
+        uuid consumption_id PK "PRIMARY KEY DEFAULT gen_random_uuid()"
+        uuid meter_id FK "REFERENCES energy_meters(meter_id) ON DELETE CASCADE"
+        timestamptz reading_timestamp "NOT NULL"
+        decimal_12_4 consumption_value "CHECK (consumption_value >= 0)"
+        varchar_20 data_quality "DEFAULT 'good' CHECK IN ('good', 'estimated', 'missing')"
+        varchar_50 data_source "DEFAULT 'sensor'"
+        jsonb weather_context "DEFAULT '{}'"
+        timestamptz created_at "DEFAULT NOW()"
+        hypertable "PARTITION BY reading_timestamp"
+        index idx_consumption_meter_time "INDEX (meter_id, reading_timestamp DESC)"
+        index idx_consumption_timestamp "INDEX (reading_timestamp)"
+        compression "COMPRESS AFTER 7 days"
+        retention "DROP CHUNKS OLDER THAN 5 years"
+    }
+    
+    weather_data {
+        uuid weather_id PK "PRIMARY KEY DEFAULT gen_random_uuid()"
+        varchar_20 location_code "NOT NULL"
+        timestamptz observation_timestamp "NOT NULL"
+        decimal_5_2 temperature_celsius "CHECK (temperature_celsius BETWEEN -50 AND 60)"
+        decimal_5_2 humidity_percent "CHECK (humidity_percent BETWEEN 0 AND 100)"
+        decimal_6_2 wind_speed_mps "CHECK (wind_speed_mps >= 0)"
+        varchar_50 weather_condition
+        decimal_8_2 solar_irradiance "CHECK (solar_irradiance >= 0)"
+        timestamptz created_at "DEFAULT NOW()"
+        hypertable "PARTITION BY observation_timestamp"
+        index idx_weather_location_time "INDEX (location_code, observation_timestamp DESC)"
+        constraint unique_weather_observation "UNIQUE (location_code, observation_timestamp)"
+    }
+    
+    users {
+        uuid user_id PK "PRIMARY KEY DEFAULT gen_random_uuid()"
+        varchar_255 email "UNIQUE NOT NULL"
+        varchar_255 name "NOT NULL"
+        varchar_50 role "NOT NULL CHECK IN ('executive', 'manager', 'analyst', 'operator')"
+        varchar_255 organization
+        jsonb preferences "DEFAULT '{}'"
+        timestamptz last_login
+        timestamptz created_at "DEFAULT NOW()"
+        index idx_users_email "INDEX (email)"
+        index idx_users_role "INDEX (role)"
+    }
+    
+    building_access {
+        uuid access_id PK "PRIMARY KEY DEFAULT gen_random_uuid()"
+        uuid user_id FK "REFERENCES users(user_id) ON DELETE CASCADE"
+        uuid building_id FK "REFERENCES buildings(building_id) ON DELETE CASCADE"
+        varchar_20 permission_level "NOT NULL CHECK IN ('read', 'write', 'admin')"
+        timestamptz granted_at "DEFAULT NOW()"
+        timestamptz expires_at
+        constraint unique_user_building_access "UNIQUE (user_id, building_id)"
+        index idx_access_user "INDEX (user_id)"
+        index idx_access_building "INDEX (building_id)"
+    }
+    
+    optimization_strategies {
+        uuid strategy_id PK "PRIMARY KEY DEFAULT gen_random_uuid()"
+        uuid building_id FK "REFERENCES buildings(building_id) ON DELETE CASCADE"
+        uuid created_by_user_id FK "REFERENCES users(user_id)"
+        varchar_100 strategy_type "NOT NULL"
+        text description
+        jsonb parameters "DEFAULT '{}'"
+        decimal_5_2 expected_savings_percent "CHECK (expected_savings_percent BETWEEN 0 AND 100)"
+        varchar_20 status "DEFAULT 'draft' CHECK IN ('draft', 'active', 'implemented', 'archived')"
+        timestamptz created_at "DEFAULT NOW()"
+        timestamptz implemented_at
+        index idx_strategies_building "INDEX (building_id)"
+        index idx_strategies_status "INDEX (status)"
+    }
+    
+    forecasts {
+        uuid forecast_id PK "PRIMARY KEY DEFAULT gen_random_uuid()"
+        uuid building_id FK "REFERENCES buildings(building_id) ON DELETE CASCADE"
+        uuid model_id FK "REFERENCES ml_models(model_id)"
+        timestamptz forecast_timestamp "NOT NULL"
+        timestamptz prediction_horizon "NOT NULL"
+        decimal_12_4 predicted_consumption "CHECK (predicted_consumption >= 0)"
+        decimal_12_4 confidence_lower "CHECK (confidence_lower >= 0)"
+        decimal_12_4 confidence_upper "CHECK (confidence_upper >= 0)"
+        jsonb model_parameters "DEFAULT '{}'"
+        timestamptz created_at "DEFAULT NOW()"
+        hypertable "PARTITION BY forecast_timestamp"
+        index idx_forecasts_building_time "INDEX (building_id, forecast_timestamp DESC)"
+        constraint check_confidence_bounds "CHECK (confidence_lower <= predicted_consumption AND predicted_consumption <= confidence_upper)"
+        constraint check_prediction_horizon "CHECK (prediction_horizon > forecast_timestamp)"
+    }
+    
+    ml_models {
+        uuid model_id PK "PRIMARY KEY DEFAULT gen_random_uuid()"
+        varchar_100 model_name "UNIQUE NOT NULL"
+        varchar_50 model_type "NOT NULL CHECK IN ('lstm', 'transformer', 'arima', 'ensemble')"
+        varchar_20 version "NOT NULL"
+        jsonb hyperparameters "DEFAULT '{}'"
+        decimal_5_4 accuracy_score "CHECK (accuracy_score BETWEEN 0 AND 1)"
+        varchar_20 status "DEFAULT 'training' CHECK IN ('training', 'active', 'deprecated')"
+        timestamptz trained_at
+        timestamptz created_at "DEFAULT NOW()"
+        constraint unique_model_version "UNIQUE (model_name, version)"
+        index idx_models_status "INDEX (status)"
+    }
+    
+    building_controls {
+        uuid control_id PK "PRIMARY KEY DEFAULT gen_random_uuid()"
+        uuid building_id FK "REFERENCES buildings(building_id) ON DELETE CASCADE"
+        varchar_50 system_type "NOT NULL CHECK IN ('hvac', 'lighting', 'equipment')"
+        varchar_100 control_point "NOT NULL"
+        jsonb current_settings "DEFAULT '{}'"
+        jsonb target_settings "DEFAULT '{}'"
+        varchar_20 control_mode "DEFAULT 'manual' CHECK IN ('manual', 'automatic', 'optimized')"
+        timestamptz last_updated "DEFAULT NOW()"
+        index idx_controls_building "INDEX (building_id)"
+        index idx_controls_system "INDEX (system_type)"
+        constraint unique_building_control_point "UNIQUE (building_id, system_type, control_point)"
+    }
+    
+    anomalies {
+        uuid anomaly_id PK "PRIMARY KEY DEFAULT gen_random_uuid()"
+        uuid building_id FK "REFERENCES buildings(building_id) ON DELETE CASCADE"
+        uuid meter_id FK "REFERENCES energy_meters(meter_id) ON DELETE CASCADE"
+        timestamptz detected_at "NOT NULL DEFAULT NOW()"
+        varchar_50 anomaly_type "NOT NULL CHECK IN ('spike', 'drop', 'pattern', 'baseline')"
+        varchar_20 severity "NOT NULL CHECK IN ('low', 'medium', 'high', 'critical')"
+        text description
+        decimal_8_4 deviation_score "CHECK (deviation_score >= 0)"
+        jsonb detection_parameters "DEFAULT '{}'"
+        varchar_30 status "DEFAULT 'new' CHECK IN ('new', 'investigating', 'resolved', 'false_positive')"
+        timestamptz resolved_at
+        hypertable "PARTITION BY detected_at"
+        index idx_anomalies_building_time "INDEX (building_id, detected_at DESC)"
+        index idx_anomalies_severity "INDEX (severity)"
+        index idx_anomalies_status "INDEX (status)"
+    }
+    
+    bdg2_buildings {
+        varchar_50 bdg2_building_id PK "PRIMARY KEY"
+        varchar_100 building_type "NOT NULL"
+        decimal_10_2 area_sqft
+        varchar_255 location
+        integer num_floors "CHECK (num_floors > 0)"
+        jsonb building_characteristics "DEFAULT '{}'"
+        timestamptz data_period_start
+        timestamptz data_period_end
+        index idx_bdg2_type "INDEX (building_type)"
+        index idx_bdg2_location "INDEX (location)"
+    }
+    
+    bdg2_benchmarks {
+        uuid benchmark_id PK "PRIMARY KEY DEFAULT gen_random_uuid()"
+        varchar_100 building_type "NOT NULL"
+        decimal_10_2 area_range_min "CHECK (area_range_min > 0)"
+        decimal_10_2 area_range_max "CHECK (area_range_max > area_range_min)"
+        decimal_12_4 avg_annual_consumption "CHECK (avg_annual_consumption > 0)"
+        decimal_12_4 median_consumption "CHECK (median_consumption > 0)"
+        decimal_12_4 efficiency_percentile_25 "CHECK (efficiency_percentile_25 > 0)"
+        decimal_12_4 efficiency_percentile_75 "CHECK (efficiency_percentile_75 >= efficiency_percentile_25)"
+        varchar_50 climate_zone
+        integer sample_size "CHECK (sample_size > 0)"
+        timestamptz calculated_at "DEFAULT NOW()"
+        index idx_benchmarks_type "INDEX (building_type)"
+        index idx_benchmarks_area "INDEX (area_range_min, area_range_max)"
+        constraint unique_benchmark_profile "UNIQUE (building_type, area_range_min, area_range_max, climate_zone)"
+    }
+    
+    %% Primary Relationships with Foreign Key Constraints
+    buildings ||--o{ energy_meters : "has_meters FK building_id CASCADE"
+    energy_meters ||--o{ energy_consumption : "records FK meter_id CASCADE"
+    buildings ||--o{ building_access : "grants_access FK building_id CASCADE"
+    users ||--o{ building_access : "has_access FK user_id CASCADE"
+    users ||--o{ optimization_strategies : "creates FK created_by_user_id"
+    buildings ||--o{ optimization_strategies : "applies_to FK building_id CASCADE"
+    buildings ||--o{ forecasts : "forecasted_for FK building_id CASCADE"
+    ml_models ||--o{ forecasts : "generates FK model_id"
+    buildings ||--o{ building_controls : "controls FK building_id CASCADE"
+    buildings ||--o{ anomalies : "experiences FK building_id CASCADE"
+    energy_meters ||--o{ anomalies : "source_of FK meter_id CASCADE"
+    buildings }o--|| bdg2_benchmarks : "benchmarked_against"
+    
+    %% Performance Optimizations
+    %% TimescaleDB Hypertables: energy_consumption, weather_data, forecasts, anomalies
+    %% Compression enabled on time-series data after 7 days
+    %% Data retention policies: 5 years for energy data, 2 years for weather data
+    %% Indexes optimized for time-series queries and building-based lookups
+    %% Partitioning strategy: monthly partitions for high-volume tables
+    
+    %% Security Constraints
+    %% Row Level Security enabled on building_access table
+    %% Encrypted storage for sensitive user data
+    %% Audit logging enabled for all data modifications 

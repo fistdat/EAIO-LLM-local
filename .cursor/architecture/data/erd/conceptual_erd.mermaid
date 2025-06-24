@@ -1,0 +1,94 @@
+erDiagram
+    %% EAIO Conceptual Entity Relationship Diagram
+    %% High-level business entities and relationships
+    
+    BUILDING {
+        string building_id PK
+        string name
+        string type
+        float area_sqft
+        string location
+        date construction_year
+    }
+    
+    ENERGY_CONSUMPTION {
+        string meter_id PK
+        string building_id FK
+        datetime timestamp
+        float consumption_kwh
+        string meter_type
+    }
+    
+    WEATHER_DATA {
+        string location_id PK
+        datetime timestamp
+        float temperature
+        float humidity
+        float wind_speed
+        string conditions
+    }
+    
+    OPTIMIZATION_STRATEGY {
+        string strategy_id PK
+        string building_id FK
+        string strategy_type
+        string description
+        float expected_savings
+        date created_date
+    }
+    
+    FORECAST {
+        string forecast_id PK
+        string building_id FK
+        datetime forecast_timestamp
+        float predicted_consumption
+        float confidence_interval
+        string model_version
+    }
+    
+    USER {
+        string user_id PK
+        string name
+        string role
+        string email
+        string organization
+    }
+    
+    BUILDING_CONTROL {
+        string control_id PK
+        string building_id FK
+        string system_type
+        string current_setting
+        datetime last_updated
+    }
+    
+    ANOMALY {
+        string anomaly_id PK
+        string building_id FK
+        datetime detected_timestamp
+        string anomaly_type
+        string severity
+        string description
+    }
+    
+    BDG2_BENCHMARK {
+        string benchmark_id PK
+        string building_type
+        float avg_consumption
+        float efficiency_score
+        string data_source
+    }
+    
+    %% Relationships
+    BUILDING ||--o{ ENERGY_CONSUMPTION : "consumes"
+    BUILDING ||--o{ OPTIMIZATION_STRATEGY : "applies"
+    BUILDING ||--o{ FORECAST : "forecasted"
+    BUILDING ||--o{ BUILDING_CONTROL : "controls"
+    BUILDING ||--o{ ANOMALY : "experiences"
+    BUILDING }o--|| BDG2_BENCHMARK : "benchmarked_against"
+    
+    USER ||--o{ OPTIMIZATION_STRATEGY : "creates"
+    USER ||--o{ BUILDING_CONTROL : "manages"
+    
+    WEATHER_DATA ||--o{ FORECAST : "influences"
+    ENERGY_CONSUMPTION ||--o{ ANOMALY : "triggers" 

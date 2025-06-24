@@ -1,0 +1,181 @@
+erDiagram
+    %% EAIO Logical Entity Relationship Diagram
+    %% Detailed entity relationships with constraints and foreign keys
+    
+    buildings {
+        uuid building_id PK
+        varchar name "NOT NULL"
+        varchar building_type "NOT NULL"
+        decimal area_sqft "CHECK > 0"
+        varchar location "NOT NULL"
+        integer construction_year
+        decimal latitude
+        decimal longitude
+        varchar timezone
+        json metadata
+        timestamp created_at "DEFAULT NOW()"
+        timestamp updated_at "DEFAULT NOW()"
+    }
+    
+    energy_meters {
+        uuid meter_id PK
+        uuid building_id FK
+        varchar meter_type "CHECK IN (electricity, gas, steam, chilled_water)"
+        varchar location_description
+        boolean is_active "DEFAULT true"
+        decimal multiplier "DEFAULT 1.0"
+        varchar units "DEFAULT 'kWh'"
+        timestamp installed_date
+        timestamp created_at "DEFAULT NOW()"
+    }
+    
+    energy_consumption {
+        uuid consumption_id PK
+        uuid meter_id FK
+        timestamp reading_timestamp "NOT NULL"
+        decimal consumption_value "CHECK >= 0"
+        varchar data_quality "CHECK IN (good, estimated, missing)"
+        varchar data_source "DEFAULT 'sensor'"
+        json weather_context
+        timestamp created_at "DEFAULT NOW()"
+    }
+    
+    weather_data {
+        uuid weather_id PK
+        varchar location_code "NOT NULL"
+        timestamp observation_timestamp "NOT NULL"
+        decimal temperature_celsius
+        decimal humidity_percent "CHECK BETWEEN 0 AND 100"
+        decimal wind_speed_mps
+        varchar weather_condition
+        decimal solar_irradiance
+        timestamp created_at "DEFAULT NOW()"
+    }
+    
+    users {
+        uuid user_id PK
+        varchar email "UNIQUE NOT NULL"
+        varchar name "NOT NULL"
+        varchar role "CHECK IN (executive, manager, analyst, operator)"
+        varchar organization
+        json preferences
+        timestamp last_login
+        timestamp created_at "DEFAULT NOW()"
+    }
+    
+    building_access {
+        uuid access_id PK
+        uuid user_id FK
+        uuid building_id FK
+        varchar permission_level "CHECK IN (read, write, admin)"
+        timestamp granted_at "DEFAULT NOW()"
+        timestamp expires_at
+    }
+    
+    optimization_strategies {
+        uuid strategy_id PK
+        uuid building_id FK
+        uuid created_by_user_id FK
+        varchar strategy_type "NOT NULL"
+        text description
+        json parameters
+        decimal expected_savings_percent
+        varchar status "CHECK IN (draft, active, implemented, archived)"
+        timestamp created_at "DEFAULT NOW()"
+        timestamp implemented_at
+    }
+    
+    forecasts {
+        uuid forecast_id PK
+        uuid building_id FK
+        uuid model_id FK
+        timestamp forecast_timestamp "NOT NULL"
+        timestamp prediction_horizon "NOT NULL"
+        decimal predicted_consumption "CHECK >= 0"
+        decimal confidence_lower "CHECK >= 0"
+        decimal confidence_upper "CHECK >= 0"
+        json model_parameters
+        timestamp created_at "DEFAULT NOW()"
+    }
+    
+    ml_models {
+        uuid model_id PK
+        varchar model_name "UNIQUE NOT NULL"
+        varchar model_type "CHECK IN (lstm, transformer, arima, ensemble)"
+        varchar version "NOT NULL"
+        json hyperparameters
+        decimal accuracy_score
+        varchar status "CHECK IN (training, active, deprecated)"
+        timestamp trained_at
+        timestamp created_at "DEFAULT NOW()"
+    }
+    
+    building_controls {
+        uuid control_id PK
+        uuid building_id FK
+        varchar system_type "CHECK IN (hvac, lighting, equipment)"
+        varchar control_point "NOT NULL"
+        json current_settings
+        json target_settings
+        varchar control_mode "CHECK IN (manual, automatic, optimized)"
+        timestamp last_updated "DEFAULT NOW()"
+    }
+    
+    anomalies {
+        uuid anomaly_id PK
+        uuid building_id FK
+        uuid meter_id FK
+        timestamp detected_at "NOT NULL"
+        varchar anomaly_type "CHECK IN (spike, drop, pattern, baseline)"
+        varchar severity "CHECK IN (low, medium, high, critical)"
+        text description
+        decimal deviation_score
+        json detection_parameters
+        varchar status "CHECK IN (new, investigating, resolved, false_positive)"
+        timestamp resolved_at
+    }
+    
+    bdg2_buildings {
+        varchar bdg2_building_id PK
+        varchar building_type "NOT NULL"
+        decimal area_sqft
+        varchar location
+        integer num_floors
+        json building_characteristics
+        timestamp data_period_start
+        timestamp data_period_end
+    }
+    
+    bdg2_benchmarks {
+        uuid benchmark_id PK
+        varchar building_type "NOT NULL"
+        decimal area_range_min
+        decimal area_range_max
+        decimal avg_annual_consumption
+        decimal median_consumption
+        decimal efficiency_percentile_25
+        decimal efficiency_percentile_75
+        varchar climate_zone
+        integer sample_size
+        timestamp calculated_at "DEFAULT NOW()"
+    }
+    
+    %% Primary Relationships
+    buildings ||--o{ energy_meters : "has_meters"
+    energy_meters ||--o{ energy_consumption : "records"
+    buildings ||--o{ building_access : "grants_access"
+    users ||--o{ building_access : "has_access"
+    users ||--o{ optimization_strategies : "creates"
+    buildings ||--o{ optimization_strategies : "applies_to"
+    buildings ||--o{ forecasts : "forecasted_for"
+    ml_models ||--o{ forecasts : "generates"
+    buildings ||--o{ building_controls : "controls"
+    buildings ||--o{ anomalies : "experiences"
+    energy_meters ||--o{ anomalies : "source_of"
+    buildings }o--|| bdg2_benchmarks : "benchmarked_against"
+    
+    %% Additional Constraints and Indexes
+    %% Index on energy_consumption(meter_id, reading_timestamp) for time-series queries
+    %% Index on weather_data(location_code, observation_timestamp) for weather lookups
+    %% Partition energy_consumption by reading_timestamp for performance
+    %% Check constraint: forecasts.prediction_horizon > forecasts.forecast_timestamp 
