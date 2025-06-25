@@ -1,0 +1,341 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Unified Cognitive Framework - Rule System
+**Version**: 1.0 | **Framework**: Cursor Rules | **Format**: .mdc  
+
+## Overview
+
+This rule system implements the **Unified Cognitive Framework** for intelligent software development and system architecture. It provides structured rules that automatically detect context and activate appropriate reasoning modes for optimal task execution.
+
+### Framework Philosophy
+> **Business First → Architecture Second → Implementation Third**
+
+All technical decisions flow from business value through architectural integrity to implementation practicality.
+
+## Rule Organization
+
+### Directory Structure
+```
+.cursor/rules/
+├── shared/                    # Cross-domain rules (000-099)
+│   ├── 001-unified-cognitive-engine.mdc
+│   ├── 100-business-alignment-standards.mdc
+│   └── [other shared rules]
+├── architecture/              # Architecture-specific rules (200-299)
+│   ├── 200-business-architecture-patterns.mdc
+│   └── [other architecture rules]
+├── development/               # Development-specific rules (300-399)
+│   ├── 300-task-management-methodology.mdc
+│   └── [other development rules]
+└── README.mdc                # This file
+```
+
+### Rule Numbering Convention
+```yaml
+rule_numbering_system:
+  000_099: shared_core_framework
+    - 001-099: Core cognitive engine and mode detection
+    
+  100_199: shared_business_alignment
+    - 100-199: Business-first principles and stakeholder value
+    
+  200_299: architecture_domain
+    - 200-249: Business architecture patterns
+    - 250-299: Technical architecture patterns
+    
+  300_399: development_domain  
+    - 300-349: Task management and agile methodology
+    - 350-399: Code quality and testing standards
+    
+  400_499: technology_standards
+    - 400-449: Platform and infrastructure standards
+    - 450-499: Integration and API standards
+    
+  500_999: specialized_patterns
+    - 500-599: Domain-specific patterns
+    - 600-699: Security and compliance
+    - 700-799: Performance and scalability
+    - 800-899: DevOps and deployment
+    - 900-999: Templates and examples
+```
+
+## Core Cognitive Modes
+
+### 🏗️ Architecture Mode (A.*)
+**Activation Triggers**: design, architecture, system, business, domain, model, erd, sequence
+
+**Purpose**: Business-aligned system design with focus on:
+- Business capability modeling
+- Stakeholder analysis and value streams
+- System component design
+- Data architecture and ERDs
+- Technology platform selection
+
+**Output Structure**:
+```
+.cursor/architecture/
+├── business/          # Business capabilities and processes
+├── data/             # Data models and ERDs
+├── application/      # Components and services
+└── technology/       # Platforms and infrastructure
+```
+
+### ⚡ Development Mode (T.*)
+**Activation Triggers**: implement, code, test, debug, fix, refactor, tdd
+
+**Purpose**: Structured implementation and testing with focus on:
+- Task breakdown and sprint planning
+- Test-driven development practices
+- Code quality and review standards
+- Progress tracking and metrics
+- Business value delivery
+
+**Output Structure**:
+```
+.cursor/tasks/
+├── backlog/          # Prioritized task lists
+├── sprints/          # Sprint planning and execution
+└── specs/            # Test specifications and criteria
+```
+
+### 🔄 Hybrid Mode (A.* + T.*)
+**Activation Triggers**: plan, feature, integrate, build, create, develop
+
+**Purpose**: Coordinated design and implementation with:
+- Parallel architecture and development workflows
+- Cross-validation between design and implementation
+- Bidirectional traceability maintenance
+- Conflict resolution between ideals and constraints
+
+## Rule Application Guidelines
+
+### For Architecture Work
+```bash
+# Business-first architecture
+"Design customer management system with stakeholder analysis"
+"Create data architecture for e-commerce platform with ERD"
+"Model business processes for order fulfillment workflow"
+
+# Component and service design
+"Design microservices architecture for payment processing"
+"Create API architecture for mobile and web applications"
+"Design integration patterns for third-party services"
+```
+
+### For Development Work
+```bash
+# Structured implementation
+"Implement user authentication with TDD approach"
+"Create sprint plan for customer management features"
+"Refactor payment service to reduce complexity"
+
+# Quality and testing focus
+"Debug performance issues in product search API"
+"Create comprehensive test suite for order processing"
+"Establish code review standards for team"
+```
+
+### For Hybrid Work
+```bash
+# Coordinated planning
+"Plan customer loyalty program with system design and implementation roadmap"
+"Build notification system with architecture design and coding tasks"
+"Create reporting dashboard with data model and frontend development"
+
+# Feature development
+"Develop checkout process with business analysis and technical implementation"
+"Build user onboarding with process design and development tasks"
+```
+
+## Key Rules Summary
+
+### [001] Unified Cognitive Engine
+- **Purpose**: Context detection and mode activation
+- **Scope**: All cognitive processing
+- **Key Features**: Signal analysis, mode selection, output structure enforcement
+
+### [100] Business Alignment Standards  
+- **Purpose**: Business-first principle enforcement
+- **Scope**: Cross-domain value alignment
+- **Key Features**: Stakeholder analysis, value traceability, ROI validation
+
+### [200] Business Architecture Patterns
+- **Purpose**: Business-driven architecture design
+- **Scope**: Architecture Mode (A.*)
+- **Key Features**: Capability modeling, process mapping, component alignment
+
+### [300] Task Management Methodology
+- **Purpose**: Structured development execution
+- **Scope**: Development Mode (T.*)
+- **Key Features**: Sprint planning, TDD integration, quality gates
+
+## Quality Gates and Validation
+
+### Architecture Quality Checks
+- [ ] Business context clearly established
+- [ ] Stakeholder needs documented and validated
+- [ ] System boundaries and integration points defined
+- [ ] Technology choices justified by business needs
+- [ ] Component boundaries respect business domains
+
+### Development Quality Checks
+- [ ] Tasks linked to business capabilities
+- [ ] Acceptance criteria clearly defined
+- [ ] Test strategy specified before implementation
+- [ ] Code quality standards enforced
+- [ ] Business value demonstrable to stakeholders
+
+### Cross-Domain Consistency
+- [ ] Naming conventions aligned across domains
+- [ ] Architecture decisions implementable with available resources
+- [ ] Development tasks support architectural goals
+- [ ] Business value traceable from strategy to code
+
+## Best Practices for Rule Usage
+
+### Effective Prompting
+```markdown
+# Architecture Mode Prompts
+✅ "Design customer management system for e-commerce platform with stakeholder analysis"
+✅ "Create data architecture for CRM with entity relationship modeling"
+
+❌ "Build a system"  # Too vague, lacks business context
+❌ "Use microservices"  # Technology-first, missing business justification
+
+# Development Mode Prompts  
+✅ "Implement user authentication with TDD approach and acceptance criteria"
+✅ "Create sprint plan for payment processing features with effort estimation"
+
+❌ "Code login"  # Missing business context and acceptance criteria
+❌ "Make it work"  # No quality standards or success criteria
+
+# Hybrid Mode Prompts
+✅ "Plan customer onboarding feature with business process design and implementation tasks"
+✅ "Build analytics dashboard with data modeling and frontend development coordination"
+
+❌ "Customer stuff"  # Unclear scope and missing coordination requirements
+❌ "Some analytics"  # Vague requirements and no architectural context
+```
+
+### Business Context Requirements
+Always include:
+- **Business Problem**: What specific business challenge are we solving?
+- **Stakeholder Value**: Who benefits and how do they benefit?
+- **Success Metrics**: How will we measure success?
+- **Constraints**: What limitations or requirements must we consider?
+
+### Technical Context Requirements
+Always include:
+- **System Boundaries**: What's in scope and what's out of scope?
+- **Integration Points**: How does this connect to existing systems?
+- **Performance Requirements**: What are the SLA and response time needs?
+- **Quality Standards**: What are the reliability and maintainability requirements?
+
+## Troubleshooting
+
+### Issue: Mode Detection Not Working
+**Symptoms**: Wrong mode activated or no clear mode indication
+
+**Solutions**:
+1. Use more specific keywords from signal lists
+2. Include business context to trigger Architecture Mode
+3. Include implementation keywords to trigger Development Mode
+4. Request explicit mode activation if needed
+
+**Example Fix**:
+```bash
+❌ "Build user system"
+✅ "Design user management system with database schema" (Architecture Mode)
+✅ "Implement user CRUD operations with TDD" (Development Mode)
+```
+
+### Issue: Missing Business Context
+**Symptoms**: Technology-first recommendations, unclear stakeholder value
+
+**Solutions**:
+1. Start with business context and stakeholder needs
+2. Explicitly map technical components to business capabilities
+3. Validate architecture against stakeholder requirements
+4. Include quantified value propositions
+
+**Example Fix**:
+```bash
+❌ "Create REST APIs for data access"
+✅ "Enable real-time customer data access for support representatives to reduce call resolution time by 30%"
+```
+
+### Issue: Overwhelming Output
+**Symptoms**: Too much detail for simple requests, over-engineered solutions
+
+**Solutions**:
+1. Request specific scope and constraints
+2. Use progressive disclosure approach
+3. Explicitly request simple or MVP approach
+4. Focus on immediate business needs
+
+**Example Fix**:
+```bash
+❌ "Design user system"
+✅ "Design simple user login for MVP with basic authentication"
+✅ "Quick implementation plan for user registration"
+```
+
+## Memory Integration
+
+### Knowledge Persistence
+```
+.cursor/memory/
+├── shared/
+│   ├── decisions.md       # Cross-domain decisions
+│   ├── patterns.md        # Successful patterns
+│   └── lessons_learned.md # Improvement insights
+├── architecture/
+│   └── design_rationale.md # Architecture decisions
+└── development/
+    └── implementation_history.md # Development practices
+```
+
+### Pattern Learning
+- **Success Patterns**: Automatically capture successful approaches
+- **Anti-Patterns**: Document and prevent recurring issues
+- **Rule Evolution**: Update rules based on experience and outcomes
+- **Knowledge Sharing**: Cross-project learning and best practice evolution
+
+## Contributing to Rules
+
+### Rule Development Process
+1. **Identify Need**: Recognize pattern or gap in current rules
+2. **Document Pattern**: Create clear, actionable rule documentation
+3. **Test Application**: Validate rule effectiveness in real scenarios
+4. **Integrate Framework**: Ensure consistency with cognitive framework
+5. **Update Documentation**: Maintain comprehensive rule documentation
+
+### Rule Quality Standards
+- **Clear Purpose**: Each rule has specific, measurable objectives
+- **Actionable Guidance**: Concrete steps and templates provided
+- **Business Alignment**: All rules support business-first principles
+- **Framework Integration**: Consistent with unified cognitive approach
+- **Continuous Improvement**: Rules evolve based on usage outcomes
+
+## Framework Evolution
+
+### Version History
+- **v1.0**: Initial framework with core cognitive modes and business alignment
+- **Future**: Enhanced AI integration, industry-specific patterns, advanced automation
+
+### Roadmap
+- **Enhanced Context Detection**: More sophisticated signal analysis
+- **Domain-Specific Rules**: Industry and technology-specific patterns
+- **AI Integration**: Machine learning for pattern recognition and rule evolution
+- **Cross-Project Learning**: Organization-wide knowledge accumulation
+
+---
+
+**Quick Start**: Use `[001] Unified Cognitive Engine` as your foundation, then apply domain-specific rules based on your context.
+
+**Support**: Refer to `cognitive_framework/unified_cognitive_framework.md` for complete framework documentation.
+
+**Community**: Share successful patterns and contribute to rule evolution through structured feedback and pattern documentation.

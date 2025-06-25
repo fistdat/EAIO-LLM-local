@@ -1,0 +1,391 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Data Architecture Standards
+**Rule ID**: 250 | **Category**: Architecture | **Version**: 1.0  
+**Domain**: Data modeling and information architecture  
+
+## Rule Purpose
+This rule defines comprehensive standards for data architecture design, ensuring business-aligned data models with proper entity relationships, performance optimization, and integration patterns.
+
+## Entity Relationship Design (ERD.*)
+
+### Three-Layer Data Architecture
+```yaml
+data_architecture_layers:
+  conceptual_layer:
+    purpose: business_entity_identification
+    audience: business_stakeholders
+    focus: what_data_exists
+    abstraction: high_level_business_concepts
+    
+  logical_layer:
+    purpose: detailed_entity_relationships
+    audience: data_architects_analysts
+    focus: how_data_relates
+    abstraction: technology_independent_structure
+    
+  physical_layer:
+    purpose: database_implementation
+    audience: database_developers
+    focus: how_data_stored
+    abstraction: technology_specific_optimization
+```
+
+### Conceptual Model Standards
+```markdown
+# Conceptual Data Model Template
+
+## Business Entity Identification
+**Business Domain**: [Core business area being modeled]
+**Key Business Processes**: [Processes that create/use this data]
+
+### Primary Business Entities
+| Entity | Business Definition | Business Value | Data Steward |
+|--------|-------------------|----------------|--------------|
+| [Entity] | [What it represents] | [Why it matters] | [Who owns it] |
+
+### Entity Relationships
+- **[Entity A]** (1) ←→ (M) **[Entity B]**: [Business relationship description]
+- **[Entity B]** (M) ←→ (M) **[Entity C]**: [Business relationship description]
+
+### Business Rules
+1. **[Rule Name]**: [Business rule] → [Data constraint]
+2. **[Rule Name]**: [Business rule] → [Data constraint]
+
+## Data Quality Requirements
+- **Accuracy**: [Required precision and correctness standards]
+- **Completeness**: [Required data completeness levels]
+- **Consistency**: [Cross-system consistency requirements]
+- **Timeliness**: [Data freshness and update frequency needs]
+```
+
+### Logical Model Standards
+```typescript
+interface LogicalEntity {
+  entityName: string;
+  businessPurpose: string;
+  attributes: LogicalAttribute[];
+  relationships: EntityRelationship[];
+  businessRules: BusinessRule[];
+  dataQualityRules: DataQualityRule[];
+}
+
+interface LogicalAttribute {
+  attributeName: string;
+  businessDefinition: string;
+  dataType: 'string' | 'number' | 'date' | 'boolean' | 'reference';
+  constraints: AttributeConstraint[];
+  businessRules: string[];
+}
+
+interface EntityRelationship {
+  fromEntity: string;
+  toEntity: string;
+  relationshipType: '1:1' | '1:M' | 'M:M';
+  businessMeaning: string;
+  referentialIntegrity: 'required' | 'optional';
+}
+```
+
+### Physical Model Optimization
+```yaml
+physical_design_principles:
+  performance_optimization:
+    indexing_strategy:
+      - primary_keys: clustered_indexes
+      - foreign_keys: non_clustered_indexes  
+      - search_columns: composite_indexes
+      - temporal_queries: partition_by_date
+      
+    partitioning_strategy:
+      - large_tables: horizontal_partitioning
+      - time_series_data: date_based_partitioning
+      - multi_tenant: tenant_based_partitioning
+      
+  storage_optimization:
+    normalization_level: third_normal_form_minimum
+    denormalization: performance_justified_only
+    archival_strategy: automated_based_on_business_rules
+    compression: enable_for_large_historical_tables
+    
+  scalability_design:
+    read_replicas: for_reporting_workloads
+    write_optimization: batch_processing_where_possible
+    caching_layer: frequently_accessed_reference_data
+    connection_pooling: optimize_for_concurrent_users
+```
+
+## Business-Driven Data Modeling
+
+### Entity Extraction Process
+```typescript
+function extractEntitiesFromBusinessProcess(process: BusinessProcess): Entity[] {
+  const entities: Entity[] = [];
+  
+  // Step 1: Identify nouns in process description
+  const businessNouns = extractNouns(process.description);
+  
+  // Step 2: Filter for data-worthy entities
+  const dataEntities = businessNouns.filter(noun => 
+    hasBusinessValue(noun) && 
+    requiresPersistence(noun) && 
+    hasAttributes(noun)
+  );
+  
+  // Step 3: Define entity relationships
+  const relationships = inferRelationships(dataEntities, process.activities);
+  
+  // Step 4: Apply business rules
+  const businessRules = extractBusinessRules(process.businessRules);
+  
+  return dataEntities.map(entity => ({
+    name: entity.name,
+    businessPurpose: entity.businessContext,
+    attributes: deriveAttributes(entity, process),
+    relationships: relationships.filter(rel => rel.involves(entity)),
+    businessRules: businessRules.filter(rule => rule.appliesTo(entity))
+  }));
+}
+```
+
+### Attribute Definition Standards
+```markdown
+# Attribute Definition Template
+
+## Attribute: [Attribute Name]
+
+### Business Context
+**Business Definition**: [What this represents in business terms]
+**Business Owner**: [Who is responsible for this data]
+**Business Rules**: [Rules governing this attribute]
+**Source of Truth**: [Where this data originates]
+
+### Technical Specification
+**Data Type**: [Technical data type]
+**Length/Precision**: [Size constraints]
+**Nullable**: [Required vs. optional]
+**Default Value**: [Default if not provided]
+**Valid Values**: [Enumeration or constraints]
+
+### Data Quality Rules
+**Format Validation**: [Expected format patterns]
+**Range Validation**: [Minimum/maximum values]
+**Business Validation**: [Business logic constraints]
+**Referential Integrity**: [Foreign key relationships]
+
+### Usage Patterns
+**Read Frequency**: [How often accessed]
+**Update Frequency**: [How often changed]
+**Query Patterns**: [How typically queried]
+**Reporting Usage**: [Reporting requirements]
+```
+
+## Integration Architecture Patterns
+
+### Data Integration Strategies
+```yaml
+integration_patterns:
+  real_time_streaming:
+    use_cases: [operational_transactions, event_driven_updates]
+    technologies: [kafka, kinesis, event_sourcing]
+    latency: milliseconds_to_seconds
+    consistency: eventual_consistency
+    
+  batch_etl:
+    use_cases: [analytical_reporting, data_warehousing]
+    technologies: [airflow, spark, sql_pipelines]
+    latency: hours_to_daily
+    consistency: strong_consistency
+    
+  api_integration:
+    use_cases: [real_time_lookups, operational_queries]
+    technologies: [rest_apis, graphql, grpc]
+    latency: sub_second
+    consistency: strong_consistency
+    
+  change_data_capture:
+    use_cases: [data_synchronization, audit_trails]
+    technologies: [debezium, maxwell, database_triggers]
+    latency: near_real_time
+    consistency: eventual_consistency
+```
+
+### Data Synchronization Patterns
+```typescript
+interface DataSynchronizationPattern {
+  patternName: string;
+  sourceSystem: string;
+  targetSystem: string;
+  synchronizationType: 'full_sync' | 'incremental' | 'real_time' | 'event_driven';
+  conflictResolution: 'source_wins' | 'timestamp_wins' | 'business_rules' | 'manual_review';
+  dataTransformation: DataTransformation[];
+  errorHandling: ErrorHandlingStrategy;
+  monitoringRequirements: MonitoringRequirement[];
+}
+
+interface DataTransformation {
+  transformationType: 'mapping' | 'enrichment' | 'filtering' | 'aggregation';
+  sourceField: string;
+  targetField: string;
+  transformationLogic: string;
+  businessJustification: string;
+}
+```
+
+## Performance and Scalability Standards
+
+### Database Performance Requirements
+```yaml
+performance_standards:
+  query_performance:
+    simple_select: 50ms_p95
+    complex_joins: 200ms_p95
+    aggregations: 500ms_p95
+    reports: 2000ms_p95
+    
+  transaction_performance:
+    single_insert: 10ms_p95
+    batch_insert: 100ms_per_1000_records
+    update_operations: 20ms_p95
+    delete_operations: 30ms_p95
+    
+  concurrent_access:
+    read_operations: 1000_concurrent_users
+    write_operations: 200_concurrent_users
+    mixed_workload: 500_concurrent_users
+    connection_pool_size: 200_connections
+    
+  availability_requirements:
+    system_uptime: 99_9_percent
+    planned_downtime: 4_hours_monthly
+    disaster_recovery: 4_hour_rpo_1_hour_rto
+    backup_frequency: daily_with_transaction_log_backup
+```
+
+### Indexing Strategy Guidelines
+```sql
+-- Primary Index Patterns
+-- 1. Clustered index on primary key
+CREATE CLUSTERED INDEX IX_Entity_PK ON Entity(entity_id);
+
+-- 2. Non-clustered indexes for foreign keys
+CREATE NONCLUSTERED INDEX IX_Entity_FK_Parent ON Entity(parent_id);
+
+-- 3. Composite indexes for common queries
+CREATE NONCLUSTERED INDEX IX_Entity_Search 
+ON Entity(status, created_date, category)
+INCLUDE (name, description);
+
+-- 4. Filtered indexes for subset queries
+CREATE NONCLUSTERED INDEX IX_Entity_Active 
+ON Entity(status, priority)
+WHERE status = 'ACTIVE';
+
+-- 5. Temporal indexes for time-series data
+CREATE NONCLUSTERED INDEX IX_Entity_Temporal 
+ON Entity(created_date, entity_id)
+WITH (DATA_COMPRESSION = PAGE);
+```
+
+## Data Quality and Governance
+
+### Data Quality Framework
+```yaml
+data_quality_dimensions:
+  accuracy:
+    definition: data_correctly_represents_real_world
+    measurement: validation_against_authoritative_sources
+    target: 99_5_percent_accuracy
+    
+  completeness:
+    definition: all_required_data_present
+    measurement: null_percentage_for_required_fields
+    target: 95_percent_completeness
+    
+  consistency:
+    definition: data_uniform_across_systems
+    measurement: cross_system_validation_checks
+    target: 98_percent_consistency
+    
+  timeliness:
+    definition: data_available_when_needed
+    measurement: data_age_vs_business_requirements
+    target: within_sla_timeframes
+    
+  validity:
+    definition: data_conforms_to_business_rules
+    measurement: business_rule_violation_percentage
+    target: 99_percent_validity
+```
+
+### Data Governance Standards
+```markdown
+# Data Governance Framework
+
+## Data Ownership
+| Data Domain | Business Owner | Technical Owner | Data Steward |
+|-------------|----------------|-----------------|--------------|
+| [Domain] | [Business Role] | [Technical Role] | [Steward Role] |
+
+## Data Classification
+- **Public**: Non-sensitive data available to all users
+- **Internal**: Company confidential data for authorized employees
+- **Confidential**: Sensitive data requiring special access controls
+- **Restricted**: Highly sensitive data with minimal access
+
+## Data Lifecycle Management
+1. **Creation**: Data entry validation and initial quality checks
+2. **Usage**: Access controls and usage monitoring
+3. **Maintenance**: Regular quality checks and updates
+4. **Archival**: Long-term storage for compliance and analytics
+5. **Disposal**: Secure deletion according to retention policies
+
+## Compliance Requirements
+- **GDPR**: Personal data protection and right to be forgotten
+- **SOX**: Financial data accuracy and audit trails
+- **HIPAA**: Healthcare data privacy and security
+- **Industry Specific**: Domain-specific regulatory requirements
+```
+
+## Implementation Guidelines
+
+### ERD Development Workflow
+1. **Business Analysis**: Interview stakeholders to understand business entities
+2. **Conceptual Design**: Create high-level entity relationship diagram
+3. **Logical Design**: Define detailed attributes and relationships
+4. **Physical Design**: Optimize for specific database technology
+5. **Implementation**: Create database schema with appropriate constraints
+6. **Validation**: Test with real data and business scenarios
+
+### Quality Gates for Data Architecture
+- [ ] Business entities map to real business concepts
+- [ ] All relationships have clear business meaning
+- [ ] Attributes have business definitions and ownership
+- [ ] Data quality rules support business requirements
+- [ ] Performance targets meet operational needs
+- [ ] Integration patterns support system architecture
+- [ ] Governance processes ensure data reliability
+
+### Common Anti-Patterns
+```markdown
+## Technology-First Data Design
+❌ **Wrong**: "Let's use document database for everything"
+✅ **Right**: "Based on our query patterns and consistency needs, choose appropriate storage"
+
+## Missing Business Context
+❌ **Wrong**: "Create tables for the application"
+✅ **Right**: "Model the business entities and their relationships"
+
+## Premature Optimization
+❌ **Wrong**: "Denormalize everything for performance"
+✅ **Right**: "Start with normalized design, optimize based on measured performance"
+
+## Ignoring Data Quality
+❌ **Wrong**: "We'll clean up the data later"
+✅ **Right**: "Build data quality controls into the initial design"
+```
+
+This rule ensures data architecture serves business needs while maintaining performance, quality, and governance standards.
