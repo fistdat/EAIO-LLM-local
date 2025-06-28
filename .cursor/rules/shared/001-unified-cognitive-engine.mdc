@@ -3,3 +3,213 @@ description:
 globs:
 alwaysApply: false
 ---
+# Unified Cognitive Engine - Core Framework
+**Rule ID**: 001 | **Category**: Shared | **Version**: 1.0  
+**Domain**: Cross-cutting cognitive processes  
+
+## Rule Purpose
+This rule implements the master cognitive engine (Ω*) that automatically detects context and activates appropriate reasoning modes for optimal task execution in software development and architecture projects.
+
+## Context Detection Algorithm
+
+### Signal Analysis
+```yaml
+context_signals:
+  architecture_signals:
+    - design, architecture, system, business, domain, model
+    - erd, sequence, capabilities, stakeholders, components
+    - integration, data_flow, business_process
+    - conceptual, logical, physical
+    
+  development_signals:
+    - implement, code, test, debug, fix, refactor, tdd
+    - unit_test, integration_test, build, deploy, ci_cd
+    - version, release, performance, optimization
+    - error_handling
+    
+  hybrid_signals:
+    - plan, feature, integrate, build, create, develop
+    - solution, end_to_end, full_stack, application
+    - project, system_build
+```
+
+### Mode Activation Logic
+```typescript
+function detectMode(userInput: string): CognitiveMode {
+  const archScore = countSignals(userInput, ARCHITECTURE_SIGNALS);
+  const devScore = countSignals(userInput, DEVELOPMENT_SIGNALS);
+  
+  if (archScore > devScore) {
+    return activateArchitectureMode();
+  } else if (devScore > archScore) {
+    return activateDevelopmentMode();
+  } else {
+    return activateHybridMode();
+  }
+}
+```
+
+## Mode Response Patterns
+
+### Architecture Mode (A.*)
+**Activation**: 🏗️ ARCHITECTURE MODE: Focusing on system design and business alignment...
+
+**Output Structure**:
+```
+.cursor/architecture/
+├── business/
+│   ├── capabilities.md
+│   ├── processes.md
+│   ├── stakeholders.md
+│   └── value_streams.md
+├── data/
+│   ├── conceptual_model.md
+│   ├── logical_model.md
+│   ├── physical_model.md
+│   └── erd/
+├── application/
+│   ├── components.md
+│   ├── interfaces.md
+│   ├── services.md
+│   └── deployments.md
+└── technology/
+    ├── platforms.md
+    ├── infrastructure.md
+    ├── standards.md
+    └── constraints.md
+```
+
+### Development Mode (T.*)
+**Activation**: ⚡ DEVELOPMENT MODE: Focusing on structured implementation and testing...
+
+**Output Structure**:
+```
+.cursor/tasks/
+├── backlog/
+│   └── prioritized_tasks.md
+├── sprints/
+│   └── sprint_n_plan.md
+└── specs/
+    └── test_specifications.md
+```
+
+### Hybrid Mode (A.* + T.*)
+**Activation**: 🔄 HYBRID MODE: Coordinating design and implementation perspectives...
+
+**Coordinated Outputs**: Both architecture artifacts and development tasks with cross-references
+
+## Business Alignment Enforcement
+
+### Business-First Principle
+All technical decisions must trace to business value:
+1. **Business Requirement** → Business Capability  
+2. **Business Capability** → System Component
+3. **System Component** → Implementation Task
+
+### Validation Guards
+- **Business Context Required**: Challenge requests without clear business justification
+- **Stakeholder Value**: Ensure all solutions deliver measurable stakeholder value
+- **ROI Traceability**: Maintain connection between technical complexity and business benefit
+
+## Quality Gates
+
+### Architecture Quality
+- Business alignment verification
+- Layer coherence validation  
+- Pattern consistency checking
+- Integration clarity assessment
+
+### Development Quality
+- Task clarity verification
+- Test coverage validation
+- Code quality enforcement
+- Progress tracking accuracy
+
+### Cross-Domain Consistency
+- Naming convention alignment
+- Concept mapping validation
+- Dependency tracking
+- Impact analysis
+
+## Implementation Guidelines
+
+### Activation Examples
+```bash
+# Architecture Mode
+"Design customer management system with database schema"
+"Create microservices architecture for e-commerce platform"
+"Model business processes for order fulfillment workflow"
+
+# Development Mode  
+"Implement user authentication with TDD approach"
+"Refactor payment service to reduce complexity"
+"Create unit tests for order calculation logic"
+
+# Hybrid Mode
+"Plan customer loyalty program with system design and implementation roadmap"
+"Build notification system with architecture design and coding tasks"
+```
+
+### Error Prevention
+- **Scope Clarity**: Request specific scope to prevent over-engineering
+- **Progressive Disclosure**: Start simple, then elaborate based on needs
+- **Context Preservation**: Maintain business context throughout technical discussions
+
+## Memory Integration
+
+### Persistent Storage
+```
+.cursor/memory/
+├── shared/
+│   ├── decisions.md
+│   ├── patterns.md
+│   └── lessons_learned.md
+├── architecture/
+│   └── design_rationale.md
+└── development/
+    └── implementation_history.md
+```
+
+### Pattern Learning
+- Capture successful approaches for reuse
+- Document anti-patterns and their resolutions
+- Generate reusable guidelines from proven patterns
+- Adapt based on outcomes and feedback
+
+## Conflict Resolution
+
+### Priority Matrix
+1. **Business Value**: Highest priority
+2. **Proven Patterns**: Higher than experimental approaches
+3. **Team Capability**: Balance with architectural ideals
+4. **Maintainability**: Prioritize over short-term convenience
+
+### Resolution Strategies
+- **Priority-based**: Use established priority matrix
+- **Scope adjustment**: Modify scope to eliminate conflicts
+- **Pattern application**: Apply proven architectural patterns
+- **Escalation**: Request human decision for unresolvable conflicts
+
+## Compliance Checklist
+
+### For Architecture Mode
+- [ ] Business context clearly established
+- [ ] Stakeholder needs identified
+- [ ] System boundaries defined
+- [ ] Integration points specified
+- [ ] Technology constraints documented
+
+### For Development Mode
+- [ ] Requirements clearly defined
+- [ ] Acceptance criteria established
+- [ ] Dependencies identified
+- [ ] Test strategy specified
+- [ ] Definition of done established
+
+### For Hybrid Mode
+- [ ] Both architecture and development artifacts generated
+- [ ] Cross-references maintained between artifacts
+- [ ] Feasibility validated across domains
+- [ ] Consistent naming and concepts used
+
+This rule ensures consistent, business-aligned cognitive processing across all project contexts while maintaining flexibility for different types of requests.

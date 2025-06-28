@@ -3,3 +3,539 @@ description:
 globs:
 alwaysApply: false
 ---
+# Test-Driven Development & Code Quality Standards
+**Rule ID**: 350 | **Category**: Development | **Version**: 1.0  
+**Domain**: Code quality, testing practices, and TDD methodology  
+
+## Rule Purpose
+This rule defines comprehensive standards for Test-Driven Development (TDD.*, ensuring high-quality code delivery through specification-first development, automated testing, and continuous quality improvement.
+
+## Test-Driven Development Methodology (TDD.*)
+
+### Red-Green-Refactor Cycle
+```typescript
+interface TDDCycle {
+  phase: 'red' | 'green' | 'refactor';
+  maxDuration: string;
+  objectives: string[];
+  exitCriteria: string[];
+  qualityGates: string[];
+}
+
+const tddWorkflow: TDDCycle[] = [
+  {
+    phase: 'red',
+    maxDuration: '15_minutes',
+    objectives: [
+      'write_failing_test_that_captures_requirement',
+      'ensure_test_fails_for_right_reason',
+      'keep_test_minimal_and_focused'
+    ],
+    exitCriteria: [
+      'test_fails_as_expected',
+      'test_is_readable_and_clear',
+      'no_other_tests_broken'
+    ],
+    qualityGates: [
+      'test_describes_expected_behavior',
+      'test_uses_meaningful_assertions',
+      'test_is_isolated_and_independent'
+    ]
+  },
+  {
+    phase: 'green',
+    maxDuration: '30_minutes',
+    objectives: [
+      'write_minimal_code_to_pass_test',
+      'focus_on_making_test_pass_not_perfection',
+      'avoid_over_engineering_solution'
+    ],
+    exitCriteria: [
+      'target_test_passes',
+      'all_existing_tests_still_pass',
+      'no_new_functionality_beyond_test'
+    ],
+    qualityGates: [
+      'solution_is_simplest_possible',
+      'no_duplication_introduced',
+      'code_is_readable'
+    ]
+  },
+  {
+    phase: 'refactor',
+    maxDuration: '20_minutes',
+    objectives: [
+      'improve_code_design_without_changing_behavior',
+      'eliminate_duplication',
+      'enhance_readability_and_maintainability'
+    ],
+    exitCriteria: [
+      'all_tests_still_pass',
+      'code_quality_improved',
+      'no_behavioral_changes'
+    ],
+    qualityGates: [
+      'follows_solid_principles',
+      'no_code_smells_present',
+      'improved_expressiveness'
+    ]
+  }
+];
+```
+
+### Specification-First Development
+```markdown
+# Feature Specification Template
+
+## User Story
+**As a** [user role]  
+**I want** [functionality]  
+**So that** [business value/outcome]
+
+## Business Context
+**Business Goal**: [Specific business objective this supports]
+**Stakeholder Value**: [Who benefits and how]
+**Success Metrics**: [How to measure success]
+
+## Acceptance Criteria
+### Scenario 1: [Happy Path]
+**Given** [initial context and preconditions]  
+**When** [user action or system event]  
+**Then** [expected outcome and system response]
+
+### Scenario 2: [Edge Case]
+**Given** [boundary condition context]  
+**When** [edge case action]  
+**Then** [expected edge case handling]
+
+### Scenario 3: [Error Condition]
+**Given** [error condition setup]  
+**When** [action that triggers error]  
+**Then** [expected error handling and user feedback]
+
+## Non-Functional Requirements
+- **Performance**: [Response time requirements]
+- **Security**: [Security considerations]
+- **Usability**: [User experience requirements]
+- **Reliability**: [Error handling and recovery]
+
+## Test Strategy
+### Unit Tests
+- [ ] Core business logic validation
+- [ ] Edge case handling
+- [ ] Error condition management
+- [ ] Input validation
+
+### Integration Tests
+- [ ] Component interaction testing
+- [ ] Data persistence validation
+- [ ] External service integration
+- [ ] API contract verification
+
+### End-to-End Tests
+- [ ] Complete user workflow
+- [ ] Cross-system integration
+- [ ] Performance validation
+- [ ] Security testing
+
+## Definition of Done
+- [ ] All acceptance criteria implemented
+- [ ] All tests passing (unit, integration, e2e)
+- [ ] Code reviewed and approved
+- [ ] Performance requirements met
+- [ ] Security requirements satisfied
+- [ ] Documentation updated
+```
+
+## Code Quality Standards
+
+### SOLID Principles Implementation
+```typescript
+// Single Responsibility Principle
+interface UserValidator {
+  validateUser(user: User): ValidationResult;
+}
+
+interface UserPersistence {
+  saveUser(user: User): Promise<User>;
+}
+
+// Open/Closed Principle
+abstract class PaymentProcessor {
+  abstract processPayment(amount: number): PaymentResult;
+}
+
+class CreditCardProcessor extends PaymentProcessor {
+  processPayment(amount: number): PaymentResult {
+    // Credit card specific implementation
+  }
+}
+
+// Liskov Substitution Principle
+interface Shape {
+  calculateArea(): number;
+}
+
+class Rectangle implements Shape {
+  constructor(private width: number, private height: number) {}
+  calculateArea(): number { return this.width * this.height; }
+}
+
+// Interface Segregation Principle
+interface Readable {
+  read(): string;
+}
+
+interface Writable {
+  write(data: string): void;
+}
+
+// Dependency Inversion Principle
+class OrderService {
+  constructor(
+    private userRepo: UserRepository,
+    private emailService: EmailService
+  ) {}
+}
+```
+
+### Code Quality Metrics
+```yaml
+quality_standards:
+  test_coverage:
+    unit_tests: 90_percent_minimum
+    integration_tests: 80_percent_minimum
+    end_to_end_tests: 70_percent_minimum
+    critical_paths: 100_percent_required
+    
+  code_complexity:
+    cyclomatic_complexity: 10_maximum_per_function
+    cognitive_complexity: 15_maximum_per_function
+    nesting_depth: 4_levels_maximum
+    function_length: 50_lines_maximum
+    
+  maintainability:
+    duplicate_code: 5_percent_maximum
+    technical_debt_ratio: 10_percent_maximum
+    code_smells: zero_critical_high_priority
+    documentation_coverage: 80_percent_public_apis
+    
+  performance:
+    build_time: 5_minutes_maximum
+    test_execution: 30_seconds_unit_10_minutes_full
+    static_analysis: 2_minutes_maximum
+    deployment_time: 15_minutes_maximum
+```
+
+### Code Review Standards
+```markdown
+# Code Review Checklist
+
+## Functionality
+- [ ] Code solves the stated problem correctly
+- [ ] Edge cases are handled appropriately
+- [ ] Error conditions are managed properly
+- [ ] Performance requirements are met
+
+## Design Quality
+- [ ] Follows SOLID principles
+- [ ] Appropriate design patterns used
+- [ ] Proper separation of concerns
+- [ ] Minimal code duplication
+
+## Readability
+- [ ] Code is self-documenting
+- [ ] Meaningful variable and function names
+- [ ] Consistent formatting and style
+- [ ] Appropriate comments for complex logic
+
+## Testing
+- [ ] Comprehensive test coverage
+- [ ] Tests are readable and maintainable
+- [ ] Tests cover edge cases and error conditions
+- [ ] Tests are isolated and independent
+
+## Security
+- [ ] Input validation implemented
+- [ ] No sensitive data in code
+- [ ] Proper authentication/authorization
+- [ ] SQL injection prevention
+
+## Business Alignment
+- [ ] Implementation matches business requirements
+- [ ] Business rules correctly implemented
+- [ ] User experience considerations addressed
+- [ ] Stakeholder value delivered
+```
+
+## Testing Architecture and Patterns
+
+### Test Pyramid Implementation
+```yaml
+test_pyramid:
+  unit_tests:
+    percentage: 70_percent
+    characteristics: [fast, isolated, focused, deterministic]
+    scope: [individual_functions, classes, modules]
+    tools: [jest, vitest, pytest, junit]
+    execution_time: milliseconds_to_seconds
+    
+  integration_tests:
+    percentage: 20_percent
+    characteristics: [moderate_speed, component_interaction, realistic]
+    scope: [service_integration, database_interaction, api_contracts]
+    tools: [testcontainers, postman, supertest]
+    execution_time: seconds_to_minutes
+    
+  end_to_end_tests:
+    percentage: 10_percent
+    characteristics: [slower, full_system, user_perspective]
+    scope: [complete_workflows, cross_system_integration]
+    tools: [playwright, cypress, selenium]
+    execution_time: minutes_to_hours
+```
+
+### Test Organization Patterns
+```typescript
+describe('UserService', () => {
+  describe('createUser', () => {
+    describe('when valid user data provided', () => {
+      it('should create user successfully', async () => {
+        // Arrange
+        const userData = { name: 'John', email: 'john@example.com' };
+        const mockRepo = jest.fn().mockResolvedValue({ id: 1, ...userData });
+        const userService = new UserService(mockRepo);
+        
+        // Act
+        const result = await userService.createUser(userData);
+        
+        // Assert
+        expect(result).toEqual({ id: 1, ...userData });
+        expect(mockRepo).toHaveBeenCalledWith(userData);
+      });
+    });
+    
+    describe('when invalid email provided', () => {
+      it('should throw validation error', async () => {
+        // Arrange
+        const invalidUserData = { name: 'John', email: 'invalid-email' };
+        const userService = new UserService(mockRepo);
+        
+        // Act & Assert
+        await expect(userService.createUser(invalidUserData))
+          .rejects.toThrow('Invalid email format');
+      });
+    });
+  });
+});
+```
+
+### Test Data Management
+```typescript
+// Test Data Builders Pattern
+class UserBuilder {
+  private user: Partial<User> = {};
+  
+  withName(name: string): UserBuilder {
+    this.user.name = name;
+    return this;
+  }
+  
+  withEmail(email: string): UserBuilder {
+    this.user.email = email;
+    return this;
+  }
+  
+  build(): User {
+    return {
+      id: this.user.id || 1,
+      name: this.user.name || 'Default Name',
+      email: this.user.email || 'default@example.com',
+      createdAt: this.user.createdAt || new Date()
+    };
+  }
+}
+
+// Usage in tests
+const user = new UserBuilder()
+  .withName('John Doe')
+  .withEmail('john@example.com')
+  .build();
+```
+
+## Continuous Quality Practices
+
+### Automated Quality Gates
+```yaml
+ci_cd_quality_gates:
+  pre_commit:
+    - lint_check: eslint_prettier_validation
+    - unit_tests: fast_feedback_tests
+    - type_check: typescript_validation
+    - security_scan: basic_vulnerability_check
+    
+  pull_request:
+    - full_test_suite: unit_integration_tests
+    - code_coverage: minimum_threshold_check
+    - code_quality: sonarqube_analysis
+    - security_scan: comprehensive_vulnerability_assessment
+    
+  deployment:
+    - performance_tests: load_stress_testing
+    - security_tests: penetration_testing
+    - integration_tests: cross_system_validation
+    - smoke_tests: critical_path_verification
+```
+
+### Quality Monitoring and Metrics
+```typescript
+interface QualityMetrics {
+  testCoverage: {
+    unit: number;
+    integration: number;
+    endToEnd: number;
+    overall: number;
+  };
+  codeQuality: {
+    cyclomaticComplexity: number;
+    technicalDebt: number;
+    duplicateCode: number;
+    maintainabilityIndex: number;
+  };
+  performance: {
+    buildTime: number;
+    testExecutionTime: number;
+    deploymentTime: number;
+    applicationResponseTime: number;
+  };
+  defectMetrics: {
+    defectDensity: number;
+    defectEscapeRate: number;
+    meanTimeToResolution: number;
+    customerReportedDefects: number;
+  };
+}
+```
+
+## TDD for Different Contexts
+
+### API Development TDD
+```typescript
+// 1. RED: Write failing API test
+describe('GET /api/users/:id', () => {
+  it('should return user by id', async () => {
+    const response = await request(app)
+      .get('/api/users/1')
+      .expect(200);
+      
+    expect(response.body).toEqual({
+      id: 1,
+      name: 'John Doe',
+      email: 'john@example.com'
+    });
+  });
+});
+
+// 2. GREEN: Implement minimal API endpoint
+app.get('/api/users/:id', (req, res) => {
+  res.json({
+    id: 1,
+    name: 'John Doe',
+    email: 'john@example.com'
+  });
+});
+
+// 3. REFACTOR: Add proper implementation
+app.get('/api/users/:id', async (req, res) => {
+  const user = await userService.findById(req.params.id);
+  res.json(user);
+});
+```
+
+### Database Integration TDD
+```typescript
+// 1. RED: Write failing database test
+describe('UserRepository', () => {
+  it('should save user to database', async () => {
+    const userData = { name: 'John', email: 'john@example.com' };
+    const savedUser = await userRepo.save(userData);
+    
+    expect(savedUser.id).toBeDefined();
+    expect(savedUser.name).toBe('John');
+    expect(savedUser.createdAt).toBeInstanceOf(Date);
+  });
+});
+
+// 2. GREEN: Implement basic save functionality
+class UserRepository {
+  async save(userData: UserData): Promise<User> {
+    const user = await this.db.user.create({
+      data: {
+        ...userData,
+        createdAt: new Date()
+      }
+    });
+    return user;
+  }
+}
+
+// 3. REFACTOR: Add validation and error handling
+class UserRepository {
+  async save(userData: UserData): Promise<User> {
+    this.validateUserData(userData);
+    
+    try {
+      const user = await this.db.user.create({
+        data: {
+          ...userData,
+          createdAt: new Date()
+        }
+      });
+      return user;
+    } catch (error) {
+      throw new DatabaseError('Failed to save user', error);
+    }
+  }
+}
+```
+
+## Implementation Guidelines
+
+### TDD Workflow Integration
+1. **Specification Analysis**: Break down acceptance criteria into testable scenarios
+2. **Test Planning**: Identify unit, integration, and e2e test requirements
+3. **Red Phase**: Write failing tests that capture requirements
+4. **Green Phase**: Implement minimal code to pass tests
+5. **Refactor Phase**: Improve code quality while maintaining test coverage
+6. **Integration**: Ensure all tests pass in CI/CD pipeline
+
+### Quality Gate Enforcement
+- **Pre-commit**: Lint, format, and fast unit tests
+- **Pull Request**: Full test suite, coverage check, and code review
+- **Pre-deployment**: Performance tests and security scans
+- **Post-deployment**: Smoke tests and monitoring validation
+
+### Common TDD Anti-Patterns
+```markdown
+## Testing Implementation Details
+❌ **Wrong**: Testing private methods or internal state
+✅ **Right**: Testing public behavior and observable outcomes
+
+## Large, Complex Tests
+❌ **Wrong**: Tests that cover multiple scenarios in one test
+✅ **Right**: Focused, single-purpose tests with clear intent
+
+## Test-Last Development
+❌ **Wrong**: Writing tests after implementation is complete
+✅ **Right**: Writing tests before implementation to drive design
+
+## Mocking Everything
+❌ **Wrong**: Excessive mocking that doesn't test real behavior
+✅ **Right**: Strategic mocking of external dependencies only
+
+## Ignoring Test Maintenance
+❌ **Wrong**: Letting tests become brittle and hard to maintain
+✅ **Right**: Treating test code with same quality standards as production code
+```
+
+This rule ensures high-quality, maintainable code through systematic TDD practices and continuous quality improvement.

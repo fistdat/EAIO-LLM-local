@@ -3,3 +3,368 @@ description:
 globs:
 alwaysApply: false
 ---
+# Business Alignment Standards
+**Rule ID**: 100 | **Category**: Shared | **Version**: 1.0  
+**Domain**: Cross-domain business value enforcement  
+
+## Rule Purpose
+This rule ensures all architecture and development decisions maintain clear traceability to business value, stakeholder needs, and measurable outcomes across all cognitive modes.
+
+## Business-First Principle
+
+### Core Alignment Framework
+```yaml
+business_alignment_hierarchy:
+  level_1_strategic:
+    focus: business_goals_and_vision
+    stakeholders: [executives, business_owners]
+    timeframe: 6_months_to_2_years
+    metrics: [revenue, market_share, customer_satisfaction]
+    
+  level_2_tactical:
+    focus: business_capabilities_and_processes
+    stakeholders: [department_heads, product_managers]
+    timeframe: 3_6_months
+    metrics: [process_efficiency, quality_improvements]
+    
+  level_3_operational:
+    focus: features_and_functionality
+    stakeholders: [end_users, operators]
+    timeframe: 2_weeks_to_3_months
+    metrics: [user_adoption, task_completion_rate]
+    
+  level_4_technical:
+    focus: components_and_code
+    stakeholders: [developers, system_administrators]
+    timeframe: hours_to_weeks
+    metrics: [performance, reliability, maintainability]
+```
+
+### Traceability Requirements
+```typescript
+interface BusinessTraceability {
+  businessGoal: string;
+  businessCapability: string;
+  stakeholderValue: string;
+  successMetrics: string[];
+  technicalComponents: string[];
+  implementationTasks: string[];
+}
+
+function validateBusinessAlignment(item: any): boolean {
+  const requiredFields = [
+    'businessContext',
+    'stakeholderValue', 
+    'successMetrics',
+    'businessJustification'
+  ];
+  
+  return requiredFields.every(field => 
+    item[field] && item[field].length > 0
+  );
+}
+```
+
+## Stakeholder Value Framework
+
+### Primary Stakeholder Categories
+```yaml
+stakeholder_matrix:
+  external_customers:
+    needs: [value_delivery, quality_experience, cost_effectiveness]
+    success_measures: [satisfaction_scores, retention_rates, referral_rates]
+    decision_influence: high
+    
+  internal_users:
+    needs: [productivity_tools, efficient_workflows, reliable_systems]
+    success_measures: [task_completion_time, error_rates, user_adoption]
+    decision_influence: medium_high
+    
+  business_executives:
+    needs: [roi_delivery, risk_mitigation, competitive_advantage]
+    success_measures: [financial_metrics, market_position, operational_efficiency]
+    decision_influence: highest
+    
+  technical_teams:
+    needs: [maintainable_systems, clear_architecture, development_efficiency]
+    success_measures: [development_velocity, defect_rates, system_reliability]
+    decision_influence: medium
+    
+  compliance_regulatory:
+    needs: [risk_management, audit_trail, regulatory_compliance]
+    success_measures: [compliance_scores, audit_results, risk_assessments]
+    decision_influence: medium_high
+```
+
+### Stakeholder Impact Assessment Template
+```markdown
+# Stakeholder Impact Analysis
+
+## Primary Stakeholders
+| Stakeholder | Role | Current Pain Point | Proposed Solution | Expected Benefit | Success Measure |
+|-------------|------|-------------------|-------------------|------------------|-----------------|
+| [Name/Role] | [Position] | [Specific problem] | [How we solve it] | [Value delivered] | [How to measure] |
+
+## Secondary Stakeholders
+| Stakeholder | Indirect Impact | Mitigation Strategy |
+|-------------|----------------|-------------------|
+| [Name/Role] | [How affected] | [How to address] |
+
+## Stakeholder Validation
+- [ ] Primary stakeholders interviewed
+- [ ] Pain points validated
+- [ ] Success criteria agreed
+- [ ] Acceptance process defined
+```
+
+## Value Proposition Requirements
+
+### Business Case Template
+```markdown
+# Business Case: [Initiative Name]
+
+## Executive Summary
+**Problem Statement**: [Specific business problem being solved]
+**Proposed Solution**: [High-level solution approach]
+**Business Value**: [Quantified value delivery]
+**Investment Required**: [Time, resources, cost]
+**Expected ROI**: [Return on investment calculation]
+
+## Business Context
+**Strategic Alignment**: [How this supports business strategy]
+**Market Drivers**: [External factors driving this need]
+**Competitive Impact**: [How this affects market position]
+**Risk Assessment**: [Risks of action vs. inaction]
+
+## Stakeholder Benefits
+### Primary Benefits
+- **[Stakeholder 1]**: [Specific benefit] → [Quantified impact]
+- **[Stakeholder 2]**: [Specific benefit] → [Quantified impact]
+
+### Secondary Benefits  
+- **[Stakeholder 3]**: [Indirect benefit] → [Estimated impact]
+
+## Success Metrics
+### Financial Metrics
+- **Revenue Impact**: [Direct revenue effects]
+- **Cost Reduction**: [Operational cost savings]
+- **Efficiency Gains**: [Process improvements]
+
+### Operational Metrics
+- **Customer Satisfaction**: [Customer impact measures]
+- **Employee Productivity**: [Internal efficiency measures]
+- **Quality Improvements**: [Error reduction, reliability gains]
+
+### Strategic Metrics
+- **Market Position**: [Competitive advantage measures]
+- **Innovation Capability**: [Future opportunity enablement]
+- **Risk Mitigation**: [Risk reduction achievements]
+
+## Implementation Approach
+**Phase 1**: [Initial delivery] → [Quick wins achieved]
+**Phase 2**: [Core implementation] → [Major value delivery]
+**Phase 3**: [Enhancement/scale] → [Maximum value realization]
+
+## Investment Justification
+**Total Investment**: [Resources required]
+**Expected Return**: [Quantified benefits]
+**Payback Period**: [Time to break even]
+**Net Present Value**: [Long-term value calculation]
+```
+
+## Business-Technical Mapping Standards
+
+### Capability-Component Alignment
+```yaml
+mapping_requirements:
+  business_capability:
+    definition: specific_business_function_or_ability
+    stakeholder_value: clear_value_proposition
+    success_metrics: measurable_outcomes
+    
+  system_component:
+    purpose: supports_specific_business_capability
+    boundaries: clear_responsibility_scope
+    interfaces: well_defined_integration_points
+    
+  implementation_task:
+    objective: delivers_component_functionality
+    acceptance: measurable_completion_criteria
+    business_value: traceable_to_capability
+```
+
+### Traceability Matrix Template
+```markdown
+# Business-Technical Traceability Matrix
+
+## Capability-Component Mapping
+| Business Capability | Stakeholder | System Component | Technical Requirement | Implementation Task |
+|-------------------|-------------|------------------|----------------------|-------------------|
+| [Capability] | [Who benefits] | [Component] | [Technical need] | [Development task] |
+
+## Value Flow Validation
+### Business Goal → Technical Implementation
+1. **Business Goal**: [Strategic objective]
+   - **Business Capability**: [Required capability]
+   - **System Component**: [Technical implementation]
+   - **Implementation Task**: [Development work]
+   - **Success Measure**: [How to validate]
+
+## Impact Analysis
+### Business Changes
+- **Capability Change**: [Business impact] → [Technical change required]
+- **Stakeholder Change**: [User impact] → [Interface change required]
+
+### Technical Changes
+- **Component Change**: [Technical change] → [Business capability impact]
+- **Integration Change**: [Interface change] → [Process impact]
+```
+
+## Quality Gates for Business Alignment
+
+### Architecture Mode Validation
+```yaml
+architecture_business_gates:
+  business_context_clarity:
+    - business_problem_clearly_defined: required
+    - stakeholder_needs_documented: required
+    - success_criteria_measurable: required
+    
+  capability_alignment:
+    - capabilities_map_to_business_functions: required
+    - component_boundaries_respect_business_domains: required
+    - integration_points_support_business_processes: required
+    
+  value_proposition:
+    - each_component_delivers_stakeholder_value: required
+    - architecture_complexity_justified_by_value: required
+    - technology_choices_driven_by_business_needs: required
+```
+
+### Development Mode Validation
+```yaml
+development_business_gates:
+  task_business_context:
+    - task_linked_to_business_capability: required
+    - stakeholder_value_clearly_articulated: required
+    - success_criteria_testable: required
+    
+  implementation_alignment:
+    - code_implements_business_rules_correctly: required
+    - user_interface_supports_business_processes: required
+    - data_models_reflect_business_entities: required
+    
+  value_delivery:
+    - features_demonstrable_to_stakeholders: required
+    - business_metrics_improvable_post_implementation: required
+    - user_adoption_strategy_defined: required
+```
+
+## Anti-Patterns and Enforcement
+
+### Common Business Misalignment Patterns
+```markdown
+## Technology-First Design
+❌ **Anti-Pattern**: Starting with technology selection
+✅ **Correct Pattern**: Starting with business problem definition
+
+**Example**:
+❌ "Let's use React and Node.js for this project"
+✅ "Let's enable customer self-service to reduce support costs, what technology best supports this?"
+
+## Missing Stakeholder Context
+❌ **Anti-Pattern**: Building without stakeholder validation
+✅ **Correct Pattern**: Continuous stakeholder engagement
+
+**Example**:
+❌ "Build a reporting dashboard"
+✅ "Enable executives to make data-driven decisions by providing real-time business metrics"
+
+## Vague Value Propositions
+❌ **Anti-Pattern**: Generic benefit statements
+✅ **Correct Pattern**: Specific, measurable value
+
+**Example**:
+❌ "Improve user experience"
+✅ "Reduce customer task completion time by 50% and increase satisfaction from 3.2 to 4.5"
+```
+
+### Enforcement Mechanisms
+```typescript
+interface BusinessAlignmentCheck {
+  checkType: 'architecture' | 'development' | 'hybrid';
+  requiredFields: string[];
+  validationRules: ValidationRule[];
+  escalationPath: string[];
+}
+
+const businessAlignmentEnforcement: BusinessAlignmentCheck[] = [
+  {
+    checkType: 'architecture',
+    requiredFields: ['businessContext', 'stakeholderAnalysis', 'valueProposition'],
+    validationRules: [
+      'stakeholder_value_quantified',
+      'business_capability_mapped',
+      'success_metrics_defined'
+    ],
+    escalationPath: ['peer_review', 'architecture_review_board', 'business_stakeholder']
+  },
+  {
+    checkType: 'development',
+    requiredFields: ['businessJustification', 'acceptanceCriteria', 'stakeholderValue'],
+    validationRules: [
+      'business_rule_compliance',
+      'user_value_demonstrable',
+      'metrics_improvable'
+    ],
+    escalationPath: ['code_review', 'product_owner', 'business_stakeholder']
+  }
+];
+```
+
+## Continuous Alignment Practices
+
+### Regular Validation Cycles
+```yaml
+validation_cadence:
+  daily_development:
+    - standup_business_context_check: each_task_linked_to_value
+    - code_review_business_rule_validation: implementation_matches_requirements
+    
+  weekly_sprint:
+    - sprint_goal_business_alignment: clear_stakeholder_value
+    - demo_stakeholder_feedback: value_validation_with_users
+    
+  monthly_architectural:
+    - architecture_review_business_alignment: capability_component_mapping
+    - stakeholder_value_assessment: benefits_realization_check
+    
+  quarterly_strategic:
+    - business_strategy_alignment: project_portfolio_business_case_review
+    - roi_assessment: value_delivery_measurement
+```
+
+### Feedback Loop Integration
+```markdown
+# Business Alignment Feedback Loop
+
+## Stakeholder Feedback Collection
+- **Daily**: User interaction analytics and feedback
+- **Weekly**: Sprint demos and stakeholder input
+- **Monthly**: Business metric review and trend analysis
+- **Quarterly**: Strategic alignment and ROI assessment
+
+## Adjustment Mechanisms
+1. **Real-time**: Task priority adjustment based on value delivery
+2. **Sprint-level**: Feature scope modification for better alignment
+3. **Release-level**: Architecture refinement for business optimization
+4. **Program-level**: Strategic direction adjustment for market changes
+
+## Learning Integration
+- **Success Patterns**: Document and replicate high-value approaches
+- **Failure Analysis**: Understand and prevent business misalignment
+- **Best Practices**: Evolve standards based on outcome data
+- **Knowledge Sharing**: Cross-team learning from alignment successes
+```
+
+This rule ensures every decision, from high-level architecture to individual code commits, maintains clear traceability to business value and stakeholder benefit.

@@ -3,3 +3,433 @@ description:
 globs:
 alwaysApply: false
 ---
+# Task Management Methodology
+**Rule ID**: 300 | **Category**: Development | **Version**: 1.0  
+**Domain**: Structured development execution and agile delivery  
+
+## Rule Purpose
+This rule defines the comprehensive task management methodology for Development Mode (T.*), ensuring structured implementation with proper planning, execution, and quality assurance aligned with business value.
+
+## Task Hierarchy and Breakdown
+
+### Task Classification System
+```yaml
+task_hierarchy:
+  epic:
+    purpose: business_capability_implementation
+    duration: 2_4_weeks
+    team_size: multiple_developers
+    acceptance: measurable_business_value
+    
+  feature:
+    purpose: specific_functionality_delivery
+    duration: 1_2_weeks
+    team_size: 1_3_developers
+    acceptance: user_demonstrable_value
+    
+  story:
+    purpose: user_facing_requirement
+    duration: 1_3_days
+    team_size: 1_developer
+    acceptance: testable_functionality
+    
+  task:
+    purpose: technical_implementation_unit
+    duration: 2_8_hours
+    team_size: 1_developer
+    acceptance: code_complete_tested
+    
+  subtask:
+    purpose: atomic_development_action
+    duration: 30_minutes_2_hours
+    team_size: 1_developer
+    acceptance: specific_deliverable
+```
+
+### Epic Definition Template
+```markdown
+# Epic: [Business Capability Name]
+
+## Business Context
+**Business Goal**: [Specific business objective]
+**Stakeholder Value**: [Who benefits and how]
+**Success Metrics**: [Measurable business outcomes]
+**ROI Justification**: [Business case for investment]
+
+## Technical Scope
+**System Components**: [Which parts of system affected]
+**Integration Points**: [External system connections]
+**Data Requirements**: [Data models and storage needs]
+**Performance Requirements**: [SLA and response time needs]
+
+## Feature Breakdown
+- [ ] **Feature 1**: [User-facing functionality] - [Business value]
+- [ ] **Feature 2**: [User-facing functionality] - [Business value]
+- [ ] **Feature 3**: [User-facing functionality] - [Business value]
+
+## Dependencies and Constraints
+**Prerequisites**: [What must be done first]
+**External Dependencies**: [Dependencies outside team control]
+**Technical Constraints**: [Platform, technology, or resource limitations]
+**Timeline Constraints**: [Business deadlines or milestones]
+
+## Definition of Done
+- [ ] All features demonstrate business value
+- [ ] Performance requirements met
+- [ ] Security requirements satisfied
+- [ ] Documentation complete
+- [ ] Stakeholder acceptance obtained
+```
+
+## Estimation Framework
+
+### Fibonacci Point System
+```yaml
+estimation_scale:
+  1_point:
+    description: trivial_task
+    duration: 1_2_hours
+    complexity: well_understood_straightforward
+    risk: minimal
+    
+  2_points:
+    description: simple_task
+    duration: 3_4_hours
+    complexity: clear_requirements_standard_approach
+    risk: low
+    
+  3_points:
+    description: moderate_task
+    duration: 1_day
+    complexity: some_unknowns_established_patterns
+    risk: medium_low
+    
+  5_points:
+    description: complex_task
+    duration: 2_3_days
+    complexity: significant_unknowns_research_needed
+    risk: medium
+    
+  8_points:
+    description: very_complex_task
+    duration: 1_week
+    complexity: high_uncertainty_new_territory
+    risk: high
+    
+  13_points:
+    description: epic_level_task
+    action: requires_breakdown
+    note: split_into_smaller_stories
+```
+
+### Velocity Calculation
+```typescript
+interface TeamVelocity {
+  teamSize: number;
+  sprintDuration: number; // weeks
+  availableHours: number;
+  historicalVelocity: number[]; // last 3 sprints
+  capacityBuffer: number; // 20% recommended
+}
+
+function calculateSprintCapacity(team: TeamVelocity): number {
+  const averageVelocity = team.historicalVelocity.reduce((a, b) => a + b, 0) / team.historicalVelocity.length;
+  const plannedCapacity = team.teamSize * team.sprintDuration * 40; // 40 hours per week
+  const adjustedCapacity = plannedCapacity * (1 - team.capacityBuffer);
+  
+  return Math.min(averageVelocity * 1.1, adjustedCapacity / 8); // 8 hours per story point average
+}
+```
+
+## Sprint Planning Methodology
+
+### Sprint Structure Standards
+```yaml
+sprint_configuration:
+  duration: 2_weeks
+  capacity_allocation:
+    development: 70_percent
+    testing: 20_percent
+    meetings_overhead: 10_percent
+    
+  ceremonies:
+    planning:
+      duration: 4_hours_maximum
+      participants: [development_team, product_owner, scrum_master]
+      outcome: committed_sprint_backlog
+      
+    daily_standup:
+      duration: 15_minutes_strict
+      format: yesterday_today_blockers
+      focus: impediment_identification
+      
+    sprint_review:
+      duration: 2_hours_maximum
+      participants: [team, stakeholders]
+      outcome: demo_feedback_next_priorities
+      
+    retrospective:
+      duration: 1_hour_maximum
+      participants: development_team_only
+      outcome: maximum_3_improvement_actions
+```
+
+### Sprint Goal Definition
+```markdown
+# Sprint [Number]: [Sprint Name]
+
+## Sprint Goal
+**Primary Objective**: [Single focused outcome]
+**Business Value**: [What business value will be delivered]
+**Success Criteria**: [How we know we succeeded]
+
+## Sprint Backlog
+### High Priority (Must Have)
+- [ ] **Story 1**: [User story] - [Points] - [Business value]
+- [ ] **Story 2**: [User story] - [Points] - [Business value]
+
+### Medium Priority (Should Have)
+- [ ] **Story 3**: [User story] - [Points] - [Business value]
+- [ ] **Story 4**: [User story] - [Points] - [Business value]
+
+### Low Priority (Could Have)
+- [ ] **Story 5**: [User story] - [Points] - [Business value]
+
+## Team Capacity
+**Available Hours**: [Total team hours for sprint]
+**Planned Story Points**: [Total points committed]
+**Capacity Buffer**: [Hours reserved for unknowns]
+
+## Dependencies and Risks
+**External Dependencies**: [Dependencies outside team control]
+**Technical Risks**: [Potential technical challenges]
+**Mitigation Plans**: [How to address risks]
+
+## Definition of Sprint Success
+- [ ] Sprint goal achieved
+- [ ] All high priority stories completed
+- [ ] No critical defects introduced
+- [ ] Team velocity maintained or improved
+```
+
+## Test-Driven Development Integration
+
+### TDD Workflow Pattern
+```typescript
+interface TDDCycle {
+  phase: 'red' | 'green' | 'refactor';
+  description: string;
+  timeLimit: string;
+  exitCriteria: string[];
+}
+
+const tddCycle: TDDCycle[] = [
+  {
+    phase: 'red',
+    description: 'Write failing test that defines desired behavior',
+    timeLimit: '15_minutes_maximum',
+    exitCriteria: ['test_fails_for_right_reason', 'test_is_minimal']
+  },
+  {
+    phase: 'green',
+    description: 'Write minimal code to make test pass',
+    timeLimit: '30_minutes_maximum',
+    exitCriteria: ['test_passes', 'no_other_tests_broken']
+  },
+  {
+    phase: 'refactor',
+    description: 'Improve code quality without changing behavior',
+    timeLimit: '15_minutes_maximum',
+    exitCriteria: ['all_tests_still_pass', 'code_quality_improved']
+  }
+];
+```
+
+### Specification-First Development
+```markdown
+# Feature Specification: [Feature Name]
+
+## User Story
+**As a** [user role]  
+**I want** [functionality]  
+**So that** [business value]
+
+## Acceptance Criteria
+**Given** [initial context]  
+**When** [action performed]  
+**Then** [expected outcome]
+
+### Test Scenarios
+1. **Happy Path**: [Normal successful flow]
+2. **Edge Cases**: [Boundary conditions]
+3. **Error Conditions**: [Failure scenarios]
+4. **Performance**: [Response time requirements]
+
+## Implementation Plan
+1. **Write Tests** (Red Phase)
+   - [ ] Unit tests for core logic
+   - [ ] Integration tests for dependencies
+   - [ ] End-to-end tests for user flow
+
+2. **Implement Code** (Green Phase)
+   - [ ] Minimal implementation to pass tests
+   - [ ] Handle error conditions
+   - [ ] Meet performance requirements
+
+3. **Refactor** (Blue Phase)
+   - [ ] Extract reusable components
+   - [ ] Improve code readability
+   - [ ] Optimize performance if needed
+
+## Definition of Done
+- [ ] All acceptance criteria met
+- [ ] All tests passing
+- [ ] Code reviewed and approved
+- [ ] Documentation updated
+- [ ] Performance targets met
+```
+
+## Quality Gates and Reviews
+
+### Definition of Ready (DoR)
+```yaml
+story_ready_criteria:
+  requirements:
+    - user_story_clearly_written: required
+    - acceptance_criteria_defined: required
+    - business_value_articulated: required
+    
+  technical:
+    - dependencies_identified: required
+    - technical_approach_sketched: required
+    - effort_estimated: required
+    
+  testability:
+    - test_scenarios_outlined: required
+    - demo_approach_defined: required
+    - definition_of_done_agreed: required
+```
+
+### Definition of Done (DoD)
+```yaml
+completion_criteria:
+  code_quality:
+    - code_written_and_reviewed: required
+    - coding_standards_followed: required
+    - no_critical_code_smells: required
+    
+  testing:
+    - unit_tests_written_passing: required
+    - integration_tests_passing: required
+    - manual_testing_completed: required
+    - test_coverage_meets_minimum: required
+    
+  documentation:
+    - code_commented_appropriately: required
+    - api_documentation_updated: required
+    - user_documentation_updated: as_needed
+    
+  deployment:
+    - builds_successfully: required
+    - deploys_to_staging: required
+    - performance_tests_pass: required
+    - security_review_completed: required
+```
+
+## Progress Tracking and Metrics
+
+### Sprint Tracking Dashboard
+```markdown
+# Sprint [Number] Progress
+
+## Burndown Status
+**Days Remaining**: [X] days  
+**Story Points Remaining**: [Y] points  
+**Completion Rate**: [Z]% on track
+
+## Daily Progress
+| Date | Completed | Remaining | Blockers | Notes |
+|------|-----------|-----------|----------|-------|
+| Day 1 | [Points] | [Points] | [Issues] | [Comments] |
+
+## Team Velocity Trends
+- **Current Sprint**: [Points committed] / [Points completed]
+- **Last 3 Sprints**: [Velocity history]
+- **Trend**: [Improving/Stable/Declining]
+
+## Quality Metrics
+- **Defect Rate**: [Bugs per story point]
+- [ ] **Rework Rate**: [% of stories requiring rework]
+- **Test Coverage**: [% code coverage]
+- **Code Quality**: [Static analysis score]
+```
+
+### Retrospective Action Tracking
+```markdown
+# Sprint Retrospective Actions
+
+## What Went Well
+- [Success 1]: Continue doing this
+- [Success 2]: Expand this practice
+
+## What Could Improve
+- [Issue 1]: [Root cause] → [Action item] → [Owner] → [Due date]
+- [Issue 2]: [Root cause] → [Action item] → [Owner] → [Due date]
+
+## Action Items (Maximum 3)
+1. **Action**: [Specific improvement action]
+   - **Owner**: [Team member responsible]
+   - **Due Date**: [When to complete]
+   - **Success Measure**: [How to know it worked]
+
+## Previous Actions Review
+- [Previous action]: [Status] - [Impact assessment]
+```
+
+## Architecture Alignment Integration
+
+### Business-Technical Traceability
+```markdown
+# Task-Architecture Alignment
+
+## Business Capability Mapping
+| Task | Feature | Business Capability | Stakeholder Value |
+|------|---------|-------------------|------------------|
+| [Task] | [Feature] | [Capability] | [Value] |
+
+## Architecture Component Impact
+| Task | System Component | Interface Changes | Data Changes |
+|------|------------------|-------------------|--------------|
+| [Task] | [Component] | [Interfaces] | [Data Models] |
+
+## Cross-Team Dependencies
+- **Upstream**: [What we need from other teams]
+- **Downstream**: [What other teams need from us]
+- **Integration Points**: [Shared system boundaries]
+```
+
+## Implementation Guidelines
+
+### Task Creation Workflow
+1. **Business Context**: Start with business need and stakeholder value
+2. **Technical Analysis**: Break down into technical components
+3. **Estimation**: Size using fibonacci scale with team consensus
+4. **Acceptance Criteria**: Define clear success criteria
+5. **Test Strategy**: Plan testing approach before implementation
+6. **Dependencies**: Identify and sequence dependencies
+
+### Sprint Execution Best Practices
+- **Daily Focus**: Commitment to sprint goal over individual tasks
+- **Collaboration**: Pair programming for complex tasks
+- **Continuous Integration**: Frequent code integration and testing
+- **Stakeholder Feedback**: Regular demos and feedback incorporation
+- **Impediment Resolution**: Rapid escalation and resolution of blockers
+
+### Quality Assurance Integration
+- **Shift Left Testing**: Testing activities early in development cycle
+- **Automated Testing**: Comprehensive automated test coverage
+- **Code Review**: Mandatory peer review for all code changes
+- **Performance Testing**: Regular performance validation
+- **Security Testing**: Security considerations in all development
+
+This rule ensures structured, business-aligned development execution with proper quality gates and continuous improvement practices.

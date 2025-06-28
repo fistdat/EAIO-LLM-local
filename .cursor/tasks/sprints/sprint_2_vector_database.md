@@ -1,75 +1,189 @@
 # Sprint 2: Vector Database & Data Integration
-**Phase T.1 - Weeks 7-8 (14 days)**  
-**Sprint Goal**: Implement Milvus vector database and BDG2 data integration pipeline
+**Development Mode (T.*) - Layer 1 Focus**
 
-## 🎯 Sprint Objectives
+## 🎯 Sprint Overview
 
-### Primary Goals
-- Setup production-ready Milvus vector database cluster
-- Implement HNSW indexing for building pattern similarity search
-- Create PostgreSQL-Milvus data synchronization
-- Build automated ETL pipeline for BDG2 dataset ingestion
+**Duration**: 14 days (Weeks 3-4)  
+**Focus**: Vector Database & Data Integration (Layer 1) with Milvus and BDG2 ETL pipeline  
+**Team Capacity**: 7 developers × 14 days = 98 person-days  
+**Story Points Target**: 73 points (Velocity: 0.74 points/person-day)
 
-### Success Criteria
-- ✅ Milvus cluster handling <50ms vector similarity searches
-- ✅ Real-time sync between PostgreSQL and Milvus databases
-- ✅ ETL pipeline processing 53.6M+ BDG2 data points
-- ✅ Vector embeddings for 1,636 building patterns stored
+### Architecture Alignment
+This sprint implements **Layer 1: Vector Database & Data Integration** from the 6-layer architecture, focusing on:
+- Milvus vector database for building pattern similarity search
+- HNSW indexing for high-performance vector search
+- Real-time PostgreSQL-Milvus synchronization
+- Automated ETL pipeline for 53.6M+ BDG2 data points
+
+---
+
+## 🏗️ Business Context & Value Delivery
+
+### Stakeholder Value
+- **Building Managers**: AI-powered building pattern matching for optimization insights
+- **Energy Engineers**: Vector search for similar building characteristics and patterns
+- **Facility Operators**: Real-time building benchmarking with <50ms search latency
+- **Sustainability Teams**: Pattern-based energy efficiency recommendations
+
+### Success Metrics
+- **Search Performance**: <50ms vector similarity searches
+- **Data Synchronization**: <5 minute latency for PostgreSQL-Milvus sync
+- **Data Processing**: 53.6M+ BDG2 data points ingested and indexed
+- **Pattern Matching**: 1,636 building patterns with 95%+ accuracy
 
 ---
 
 ## 📋 Sprint Backlog
 
-### Week 1 (Days 1-7): Milvus Foundation
+### Epic 1: Milvus Vector Database Foundation
+**Goal**: Production-ready Milvus cluster with HNSW indexing for building pattern search
 
-#### **T1.015** 🔴 Install and configure Milvus cluster
-**Assignee**: Infrastructure Engineer  
-**Estimate**: 3 days  
-**Priority**: Highest  
+**T2.001** - Install and configure Milvus cluster
+- **Story Points**: 13
+- **Assignee**: Infrastructure Engineer + DevOps Engineer
+- **Duration**: 3 days
+- **Dependencies**: Sprint 1 completion
+- **Architecture Reference**: `.cursor/architecture/data/vector_database.md` - Milvus cluster setup
+- **Acceptance Criteria**:
+  - [ ] Milvus 2.3+ cluster with 3 nodes running on M1 environment
+  - [ ] etcd for metadata storage configured and operational
+  - [ ] MinIO for object storage configured with 10GB capacity
+  - [ ] Basic CRUD operations tested and working
+  - [ ] Cluster monitoring and health checks enabled
 
-**Tasks**:
-- [ ] Setup Milvus 2.3+ cluster on local M1 environment
-- [ ] Configure 3-node cluster for high availability
-- [ ] Setup etcd for metadata storage
-- [ ] Configure MinIO for object storage
-- [ ] Test cluster connectivity and basic operations
-- [ ] Setup cluster monitoring and health checks
+**T2.002** - Create vector collections for building patterns
+- **Story Points**: 21
+- **Assignee**: Data Engineer + ML Engineer
+- **Duration**: 4 days
+- **Dependencies**: T2.001
+- **Architecture Reference**: `.cursor/architecture/data/vector_collections.md` - Collection schema design
+- **Acceptance Criteria**:
+  - [ ] Building characteristics collection with 384-dim embeddings
+  - [ ] Energy patterns collection for consumption analysis
+  - [ ] Collection partitioning by building type implemented
+  - [ ] Data validation rules enforced for all collections
+  - [ ] Performance testing with sample data completed
 
-**Configuration Requirements**:
-```yaml
-milvus_cluster:
-  version: "2.3.4"
-  nodes: 3
-  memory_allocation: 2GB_per_node
-  storage_backend: minio
-  metadata_backend: etcd
-  network_ports: [19530, 9091]
-```
+**T2.003** - Implement HNSW indexing for similarity search
+- **Story Points**: 13
+- **Assignee**: ML Engineer + Performance Engineer
+- **Duration**: 3 days
+- **Dependencies**: T2.002
+- **Architecture Reference**: `.cursor/architecture/data/hnsw_optimization.md` - Index configuration
+- **Acceptance Criteria**:
+  - [ ] HNSW indexes built with optimal parameters (M=16, efConstruction=200)
+  - [ ] Search performance <50ms for p95 latency
+  - [ ] Search accuracy recall@10 > 95%
+  - [ ] Index maintenance procedures automated
+  - [ ] Memory usage optimized for M1 hardware
 
-**Definition of Done**:
-- Milvus cluster with 3 nodes running successfully
-- All cluster components healthy and connected
-- Basic CRUD operations tested and working
-- Monitoring endpoints accessible
+### Epic 2: Data Synchronization & ETL Pipeline
+**Goal**: Real-time PostgreSQL-Milvus sync and automated BDG2 data ingestion
+
+**T2.004** - Setup Milvus-PostgreSQL data synchronization
+- **Story Points**: 21
+- **Assignee**: Backend Developer + Integration Engineer
+- **Duration**: 5 days
+- **Dependencies**: Sprint 1 database completion, T2.002
+- **Architecture Reference**: `.cursor/architecture/data/sync_architecture.md` - Real-time sync design
+- **Acceptance Criteria**:
+  - [ ] Change Data Capture (CDC) for PostgreSQL implemented
+  - [ ] Real-time sync service for building data updates
+  - [ ] Embedding generation pipeline for vector creation
+  - [ ] Conflict resolution strategies for data consistency
+  - [ ] Sync performance <5 minute latency achieved
+
+**T2.005** - Design ETL pipeline for BDG2 data ingestion
+- **Story Points**: 13
+- **Assignee**: Data Engineer + ETL Specialist
+- **Duration**: 4 days
+- **Dependencies**: Sprint 1 database completion
+- **Architecture Reference**: `.cursor/architecture/data/etl_pipeline.md` - BDG2 processing design
+- **Acceptance Criteria**:
+  - [ ] ETL pipeline architecture for 53.6M+ BDG2 data points
+  - [ ] Data validation and cleaning rules implemented
+  - [ ] Batch ingestion jobs with parallel processing
+  - [ ] Data quality monitoring and error handling
+  - [ ] Performance testing with sample BDG2 datasets
+
+**T2.006** - Implement automated data quality monitoring
+- **Story Points**: 8
+- **Assignee**: Data Quality Engineer + Monitoring Specialist
+- **Duration**: 3 days
+- **Dependencies**: T2.004, T2.005
+- **Architecture Reference**: `.cursor/architecture/data/quality_monitoring.md` - DQ framework
+- **Acceptance Criteria**:
+  - [ ] Automated data quality checks for PostgreSQL and Milvus
+  - [ ] Real-time monitoring of sync consistency
+  - [ ] Alert system for data quality violations
+  - [ ] Quality metrics dashboard and reporting
+  - [ ] Data lineage tracking for audit purposes
 
 ---
 
-#### **T1.016** 🔴 Create vector collections for building patterns
-**Assignee**: Data Engineer  
-**Estimate**: 4 days  
-**Priority**: Highest  
-**Dependencies**: T1.015  
+## 📊 Sprint Metrics
 
-**Tasks**:
-- [ ] Design vector schema for building energy patterns
-- [ ] Create collections for building characteristics
-- [ ] Setup collections for energy consumption patterns  
-- [ ] Configure vector dimensions (384-dim embeddings)
-- [ ] Implement collection partitioning by building type
-- [ ] Setup data validation and constraints
-- [ ] Test collection operations and performance
+### Velocity Tracking
+- **Planned Story Points**: 73 SP
+- **Estimated Hours**: 182 hours
+- **Team Capacity**: 7 developers × 26 hours = 182 hours
 
-**Vector Collections Design**:
+### Performance Targets
+| Metric | Target | Measurement |
+|--------|--------|-------------|
+| **Vector Search** | <50ms | Milvus performance testing |
+| **Data Sync** | <5 min latency | CDC monitoring |
+| **ETL Processing** | 53.6M+ records | Pipeline throughput |
+| **Search Accuracy** | 95%+ recall@10 | Vector similarity testing |
+
+### Daily Standup Questions
+1. What did you complete yesterday?
+2. What will you work on today?
+3. Are there any blockers or dependencies?
+4. Is the sprint goal still achievable?
+
+---
+
+## 🔧 Technical Requirements
+
+### Development Environment
+- **Vector Database**: Milvus 2.3+ with 3-node cluster
+- **Storage**: etcd (metadata) + MinIO (object storage)
+- **Tools**: Milvus CLI, Attu (admin GUI), pymilvus client
+- **Monitoring**: Milvus metrics, custom dashboards
+
+### Infrastructure Setup
+```yaml
+# Docker Compose for Milvus cluster
+services:
+  milvus-standalone:
+    image: milvusdb/milvus:v2.3.4
+    environment:
+      ETCD_ENDPOINTS: etcd:2379
+      MINIO_ADDRESS: minio:9000
+    ports:
+      - "19530:19530"
+      - "9091:9091"
+    volumes:
+      - milvus_data:/var/lib/milvus
+      
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.5
+    ports:
+      - "2379:2379"
+    volumes:
+      - etcd_data:/etcd
+      
+  minio:
+    image: minio/minio:RELEASE.2023-03-20T20-16-18Z
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+```
+
+### Vector Collection Schema
 ```python
 # Building Characteristics Collection
 building_collection = {
@@ -99,342 +213,42 @@ energy_pattern_collection = {
 }
 ```
 
-**Definition of Done**:
-- All vector collections created with proper schema
-- 384-dimension embeddings supported
-- Partitioning by building type working
-- Data validation rules enforced
+---
+
+## 🎯 Sprint Deliverables
+
+### Architecture Outputs
+- **Vector Database**: Production Milvus cluster with HNSW indexing
+- **Data Sync Service**: Real-time PostgreSQL-Milvus synchronization
+- **ETL Pipeline**: Automated BDG2 data ingestion and processing
+- **Quality Framework**: Data monitoring and validation system
+
+### Documentation
+- **Vector Search Guide**: Building pattern similarity search documentation
+- **Sync Architecture**: Real-time data synchronization design
+- **ETL Operations**: BDG2 data processing and quality procedures
+- **Performance Report**: Vector search and data sync benchmarks
 
 ---
 
-#### **T1.017** 🔴 Implement HNSW indexing for similarity search
-**Assignee**: ML Engineer  
-**Estimate**: 3 days  
-**Priority**: Highest  
-**Dependencies**: T1.016  
+## 🔄 Sprint Dependencies & Handoffs
 
-**Tasks**:
-- [ ] Configure HNSW index parameters for optimal performance
-- [ ] Create indexes on building characteristics collection
-- [ ] Setup indexes on energy patterns collection
-- [ ] Optimize index parameters for M1 hardware
-- [ ] Test search performance and accuracy
-- [ ] Implement index maintenance procedures
-- [ ] Benchmark against performance targets
+### Prerequisites
+- Sprint 1: PostgreSQL + TimescaleDB foundation completed
+- BDG2 dataset access and preprocessing completed
+- Embedding model selection and configuration
 
-**HNSW Configuration**:
-```json
-{
-  "index_type": "HNSW",
-  "metric_type": "COSINE",
-  "params": {
-    "M": 16,
-    "efConstruction": 200,
-    "ef": 100
-  }
-}
-```
+### Sprint Completion Criteria
+- [ ] All 6 tasks completed and tested
+- [ ] Milvus cluster operational with <50ms search performance
+- [ ] PostgreSQL-Milvus sync <5 minute latency achieved
+- [ ] ETL pipeline tested with BDG2 sample data
+- [ ] Data quality monitoring active and alerting
 
-**Performance Targets**:
-- Search latency: p95 < 50ms
-- Search accuracy: recall@10 > 95%
-- Index build time: < 2 hours for full dataset
-- Memory usage: < 2GB per collection
-
-**Definition of Done**:
-- HNSW indexes built and optimized
-- Search performance meets targets
-- Index maintenance automated
-- Performance benchmarking completed
-
----
-
-### Week 2 (Days 8-14): Data Synchronization & ETL
-
-#### **T1.018** 🔴 Setup Milvus-PostgreSQL data synchronization
-**Assignee**: Backend Developer  
-**Estimate**: 5 days  
-**Priority**: Highest  
-**Dependencies**: T1.002, T1.016  
-
-**Tasks**:
-- [ ] Design synchronization architecture
-- [ ] Implement CDC (Change Data Capture) for PostgreSQL
-- [ ] Create sync service for real-time updates
-- [ ] Setup embedding generation pipeline
-- [ ] Implement conflict resolution strategies
-- [ ] Create sync monitoring and alerting
-- [ ] Test sync performance and reliability
-
-**Synchronization Architecture**:
-```python
-# Sync Service Components
-class DataSyncService:
-    def __init__(self):
-        self.postgres_client = PostgreSQLClient()
-        self.milvus_client = MilvusClient()
-        self.embedding_generator = EmbeddingGenerator()
-        self.cdc_listener = CDCListener()
-    
-    def sync_building_data(self, building_id):
-        # Get building data from PostgreSQL
-        building_data = self.postgres_client.get_building(building_id)
-        
-        # Generate embeddings
-        embedding = self.embedding_generator.encode(building_data)
-        
-        # Upsert to Milvus
-        self.milvus_client.upsert(
-            collection="building_characteristics",
-            data={
-                "building_id": building_id,
-                "embedding": embedding,
-                **building_data
-            }
-        )
-```
-
-**Definition of Done**:
-- Real-time sync between PostgreSQL and Milvus
-- CDC triggers properly configured
-- Embedding generation pipeline working
-- Sync performance <5 minutes latency
-
----
-
-#### **T1.023** 🔴 Design ETL pipeline for BDG2 data ingestion
-**Assignee**: Data Engineer  
-**Estimate**: 4 days  
-**Priority**: High  
-**Dependencies**: T1.002  
-
-**Tasks**:
-- [ ] Analyze BDG2 dataset structure and format
-- [ ] Design ETL pipeline architecture
-- [ ] Implement data validation and cleaning
-- [ ] Create batch ingestion jobs
-- [ ] Setup data quality monitoring
-- [ ] Implement error handling and retry logic
-- [ ] Test with sample BDG2 data
-
-**ETL Pipeline Design**:
-```yaml
-# ETL Pipeline Stages
-etl_pipeline:
-  extract:
-    source: bdg2_csv_files
-    format: hourly_energy_readings
-    validation: schema_conformance
-    
-  transform:
-    data_cleaning: remove_outliers_nulls
-    normalization: standardize_units
-    aggregation: daily_weekly_patterns
-    feature_engineering: consumption_profiles
-    
-  load:
-    target_postgresql: energy_consumption_table
-    target_milvus: energy_patterns_collection
-    batch_size: 10000_records
-    parallel_workers: 4
-```
-
-**Data Quality Rules**:
-- Energy readings must be non-negative
-- Timestamps must be sequential and valid
-- Building IDs must exist in buildings table
-- Missing data gaps < 10% per building
-- Outliers beyond 3 standard deviations flagged
-
-**Definition of Done**:
-- ETL pipeline handles 53.6M+ data points
-- Data quality rules enforced
-- Pipeline performance meets targets
-- Error handling and monitoring in place
-
----
-
-#### **T1.024** 🔴 Implement real-time data streaming capabilities
-**Assignee**: Backend Developer  
-**Estimate**: 5 days  
-**Priority**: High  
-**Dependencies**: T1.003  
-
-**Tasks**:
-- [ ] Setup Kafka for real-time data streaming
-- [ ] Create producers for live energy meter data
-- [ ] Implement stream processing with Kafka Streams
-- [ ] Setup consumers for database ingestion
-- [ ] Create stream monitoring and alerting
-- [ ] Test streaming performance and reliability
-- [ ] Implement stream replay capabilities
-
-**Streaming Architecture**:
-```yaml
-# Real-time Streaming Setup
-kafka_setup:
-  topics:
-    - energy_readings: 10_partitions
-    - building_updates: 3_partitions
-    - weather_data: 5_partitions
-    
-  producers:
-    - meter_data_producer: energy_readings
-    - building_config_producer: building_updates
-    - weather_api_producer: weather_data
-    
-  consumers:
-    - timescaledb_consumer: energy_readings
-    - milvus_sync_consumer: building_updates
-    - analytics_consumer: all_topics
-```
-
-**Performance Targets**:
-- Streaming latency: p95 < 5 minutes
-- Throughput: 10,000 records/second
-- Message retention: 7 days
-- Consumer lag: < 1 minute
-
-**Definition of Done**:
-- Real-time streaming pipeline operational
-- All performance targets met
-- Monitoring and alerting configured
-- Stream replay functionality tested
-
----
-
-## 📊 Sprint Metrics
-
-### Velocity Tracking
-- **Planned Story Points**: 24 SP
-- **Estimated Hours**: 144 hours
-- **Team Capacity**: 3 developers × 48 hours = 144 hours
-
-### Performance Targets
-| Component | Target | Measurement Method |
-|-----------|--------|-------------------|
-| **Vector Search** | <50ms p95 | Milvus performance testing |
-| **Data Sync** | <5min latency | CDC monitoring |
-| **ETL Pipeline** | 53.6M+ records | BDG2 dataset processing |
-| **Streaming** | 10K records/sec | Kafka throughput testing |
-
----
-
-## 🔧 Technical Requirements
-
-### Infrastructure Components
-```yaml
-# Docker Compose Extensions
-services:
-  milvus-etcd:
-    image: quay.io/coreos/etcd:v3.5.5
-    
-  milvus-minio:
-    image: minio/minio:RELEASE.2023-03-20T20-16-18Z
-    
-  milvus-standalone:
-    image: milvusdb/milvus:v2.3.4
-    depends_on: [milvus-etcd, milvus-minio]
-    
-  kafka:
-    image: confluentinc/cp-kafka:7.4.0
-    
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-```
-
-### Development Tools
-- **Milvus Client**: pymilvus, milvus SDK
-- **Vector Operations**: sentence-transformers, numpy
-- **Data Processing**: pandas, dask for large datasets
-- **Stream Processing**: kafka-python, confluent-kafka
-- **Monitoring**: Prometheus, Grafana, Kafka Manager
-
----
-
-## 🧪 Testing Strategy
-
-### Performance Testing
-```python
-# Vector Search Performance Test
-def test_vector_search_performance():
-    milvus_client = MilvusClient()
-    
-    # Generate test embeddings
-    test_embeddings = generate_test_vectors(1000)
-    
-    # Measure search latency
-    start_time = time.time()
-    results = milvus_client.search(
-        collection_name="building_characteristics",
-        query_vectors=test_embeddings[:10],
-        limit=10
-    )
-    search_time = time.time() - start_time
-    
-    # Verify performance target
-    assert search_time / 10 < 0.050  # <50ms per search
-    assert len(results) == 10
-```
-
-### Data Quality Testing
-```python
-# ETL Pipeline Data Quality Test
-def test_bdg2_data_quality():
-    # Load sample BDG2 data
-    sample_data = load_bdg2_sample()
-    
-    # Run ETL pipeline
-    processed_data = etl_pipeline.process(sample_data)
-    
-    # Validate data quality
-    assert processed_data.energy_readings.min() >= 0
-    assert processed_data.timestamps.is_monotonic_increasing
-    assert processed_data.building_ids.isin(valid_building_ids).all()
-    assert processed_data.null_percentage < 0.10
-```
-
----
-
-## 🚨 Risk Mitigation
-
-### Technical Risks
-- **Milvus Complexity**: Dedicated infrastructure engineer with vector DB experience
-- **M1 Compatibility**: Test thoroughly with Apple Silicon optimizations
-- **Data Sync Reliability**: Implement comprehensive error handling and retry logic
-
-### Performance Risks
-- **Vector Search Latency**: Optimize HNSW parameters iteratively
-- **ETL Throughput**: Use parallel processing and batch optimization
-- **Memory Usage**: Monitor and tune Milvus memory allocation
-
-### Data Risks
-- **BDG2 Data Quality**: Implement robust validation and cleaning
-- **Sync Consistency**: Use transactions and conflict resolution
-- **Stream Reliability**: Setup proper monitoring and alerting
-
----
-
-## ✅ Sprint Success Criteria
-
-### Technical Deliverables
-- [ ] Milvus cluster operational with 3 nodes
-- [ ] Vector similarity search <50ms performance
-- [ ] PostgreSQL-Milvus real-time synchronization
-- [ ] ETL pipeline processing full BDG2 dataset
-- [ ] Real-time streaming pipeline operational
-
-### Quality Gates
-- [ ] All unit tests passing (>80% coverage)
-- [ ] Performance benchmarks met
-- [ ] Data quality validation passed
-- [ ] Security review completed
-- [ ] Documentation updated
-
-### Business Value
-- [ ] Building pattern similarity search functional
-- [ ] Real-world BDG2 data available for analysis
-- [ ] Foundation for AI agent memory system
-- [ ] Scalable data ingestion capability
+### Handoff to Next Sprint
+- **To Sprint 3**: Vector database ready for LLM integration
+- **Pattern Search**: Available for building similarity analysis
+- **Data Pipeline**: BDG2 ingestion ready for production scale
+- **Performance Baseline**: Vector search benchmarks established
 
 This sprint establishes the critical vector database and data integration foundation, enabling advanced AI capabilities and real-world building energy pattern analysis. 

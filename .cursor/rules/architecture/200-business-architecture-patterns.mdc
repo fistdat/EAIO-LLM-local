@@ -3,3 +3,300 @@ description:
 globs:
 alwaysApply: false
 ---
+# Business Architecture Patterns
+**Rule ID**: 200 | **Category**: Architecture | **Version**: 1.0  
+**Domain**: Business capability modeling and stakeholder analysis  
+
+## Rule Purpose
+This rule defines patterns and standards for creating business architecture artifacts that ensure technical solutions are properly aligned with business value and stakeholder needs.
+
+## Business-First Design Methodology
+
+### Core Principle
+> **Business Context → Business Capability → Technical Component → Implementation**
+
+Every technical decision must be traceable to a specific business need and stakeholder value.
+
+### Stakeholder Analysis Framework
+```yaml
+stakeholder_categories:
+  primary_users:
+    - end_customers
+    - internal_users
+    - system_operators
+    
+  decision_makers:
+    - business_owners
+    - product_managers
+    - technical_architects
+    
+  influencers:
+    - compliance_officers
+    - security_teams
+    - vendors_partners
+```
+
+## Business Capability Modeling
+
+### Capability Identification Process
+1. **Business Function Analysis**: What does the business do?
+2. **Value Stream Mapping**: How does value flow to customers?
+3. **Process Decomposition**: What are the key business processes?
+4. **Capability Extraction**: What capabilities enable these processes?
+
+### Capability Documentation Template
+```markdown
+# Business Capability: [Capability Name]
+
+## Business Context
+**Business Function**: [Core business function this supports]
+**Value Proposition**: [How this creates business value]
+**Success Metrics**: [Measurable business outcomes]
+
+## Stakeholder Impact
+| Stakeholder | Need | Benefit | Success Measure |
+|-------------|------|---------|-----------------|
+| [Role] | [Specific need] | [Value delivered] | [How to measure] |
+
+## Process Dependencies
+- **Upstream**: [What feeds into this capability]
+- **Downstream**: [What this capability enables]
+- **Cross-functional**: [Interactions with other capabilities]
+
+## Technical Requirements
+- **Data Needs**: [Information required]
+- **Integration Points**: [System connections needed]
+- **Performance Requirements**: [SLA and response time needs]
+- **Security Requirements**: [Compliance and protection needs]
+
+## Implementation Priority
+**Priority Level**: [High/Medium/Low]
+**Business Justification**: [Why this priority]
+**Dependencies**: [What must come first]
+**Risk Assessment**: [Implementation risks]
+```
+
+## Value Stream Design
+
+### Value Stream Mapping Process
+```typescript
+interface ValueStream {
+  name: string;
+  customerValue: string;
+  businessProcesses: BusinessProcess[];
+  capabilitiesRequired: BusinessCapability[];
+  crossFunctionalDependencies: string[];
+  performanceMetrics: KPI[];
+}
+
+function mapValueStream(businessGoal: string): ValueStream {
+  return {
+    name: extractValueStreamName(businessGoal),
+    customerValue: identifyCustomerValue(businessGoal),
+    businessProcesses: decomposeToProcesses(businessGoal),
+    capabilitiesRequired: mapRequiredCapabilities(businessGoal),
+    crossFunctionalDependencies: identifyDependencies(businessGoal),
+    performanceMetrics: defineSuccessMetrics(businessGoal)
+  };
+}
+```
+
+### Value Stream Documentation Pattern
+```markdown
+# Value Stream: [Stream Name]
+
+## Customer Value Proposition
+**Customer Outcome**: [What value the customer receives]
+**Business Outcome**: [What value the business realizes]
+**Success Metrics**: [How success is measured]
+
+## Process Flow
+1. **[Process 1]**: [Description] → [Output]
+2. **[Process 2]**: [Description] → [Output]
+3. **[Process 3]**: [Description] → [Output]
+
+## Capability Requirements
+| Capability | Process | Criticality | Current State | Target State |
+|------------|---------|-------------|---------------|--------------|
+| [Capability] | [Process] | [High/Med/Low] | [As-is] | [To-be] |
+
+## Performance Targets
+- **Cycle Time**: [End-to-end process time]
+- **Quality**: [Error rate, customer satisfaction]
+- **Cost**: [Process cost, efficiency metrics]
+- **Capacity**: [Volume, throughput requirements]
+```
+
+## Business Process Modeling
+
+### Process Documentation Standards
+```yaml
+process_components:
+  inputs:
+    - data_inputs: required_information
+    - triggers: events_that_start_process
+    - resources: people_systems_tools_needed
+    
+  activities:
+    - sequence: step_by_step_activities
+    - decisions: decision_points_and_criteria
+    - handoffs: responsibility_transfers
+    
+  outputs:
+    - deliverables: tangible_process_outputs
+    - outcomes: business_results_achieved
+    - metrics: success_measurements
+```
+
+### Process-to-System Mapping
+```markdown
+# Business Process: [Process Name]
+
+## Process Overview
+**Purpose**: [Why this process exists]
+**Scope**: [What's included/excluded]
+**Owner**: [Process owner role]
+**Frequency**: [How often this runs]
+
+## Process Steps
+| Step | Activity | Role | System | Input | Output | Decision Points |
+|------|----------|------|--------|-------|--------|-----------------|
+| 1 | [Activity] | [Role] | [System] | [Input] | [Output] | [Decisions] |
+
+## System Integration Requirements
+- **Data Flow**: [How data moves between systems]
+- **System Dependencies**: [Critical system connections]
+- **Integration Patterns**: [How systems connect]
+- **Error Handling**: [What happens when things fail]
+
+## Business Rules
+1. **Rule 1**: [Business rule] → [System constraint]
+2. **Rule 2**: [Business rule] → [System constraint]
+
+## Quality Requirements
+- **Accuracy**: [Data quality standards]
+- **Timeliness**: [Processing time requirements]
+- **Reliability**: [Availability requirements]
+- **Compliance**: [Regulatory requirements]
+```
+
+## Capability-to-Component Mapping
+
+### Architecture Alignment Process
+```typescript
+function mapCapabilitiesToComponents(
+  capabilities: BusinessCapability[],
+  architecturalPrinciples: string[]
+): SystemComponent[] {
+  
+  return capabilities.map(capability => ({
+    componentName: deriveComponentName(capability),
+    businessPurpose: capability.businessFunction,
+    functionalRequirements: extractRequirements(capability),
+    integrationNeeds: identifyIntegrations(capability),
+    dataRequirements: extractDataNeeds(capability),
+    performanceRequirements: extractPerformanceNeeds(capability)
+  }));
+}
+```
+
+### Component Traceability Matrix
+```markdown
+# Capability-Component Traceability
+
+| Business Capability | System Component | Business Process | Stakeholder | Technical Requirement |
+|-------------------|------------------|------------------|-------------|----------------------|
+| [Capability] | [Component] | [Process] | [Stakeholder] | [Requirement] |
+
+## Component Design Principles
+- **Single Responsibility**: Each component serves one business capability
+- **Bounded Context**: Clear business domain boundaries
+- **Stakeholder Alignment**: Components map to stakeholder needs
+- **Integration Clarity**: Well-defined integration points
+```
+
+## Quality Gates for Business Architecture
+
+### Business Alignment Validation
+```yaml
+validation_checklist:
+  stakeholder_coverage:
+    - all_primary_stakeholders_identified: required
+    - stakeholder_needs_documented: required
+    - value_proposition_clear: required
+    
+  capability_completeness:
+    - all_business_functions_covered: required
+    - capability_dependencies_mapped: required
+    - capability_priorities_established: required
+    
+  process_clarity:
+    - process_flows_documented: required
+    - decision_points_identified: required
+    - handoffs_specified: required
+    
+  technical_traceability:
+    - capability_to_component_mapping: required
+    - business_rules_captured: required
+    - integration_points_identified: required
+```
+
+### Review Criteria
+- **Business Value Clarity**: Every capability clearly states business value
+- **Stakeholder Validation**: Stakeholders confirm needs and priorities
+- **Process Completeness**: All critical business processes documented
+- **Technical Feasibility**: Architecture team confirms implementability
+
+## Anti-Patterns to Avoid
+
+### Technology-First Design
+```markdown
+❌ **Wrong**: "We need a microservices architecture with Docker and Kubernetes"
+✅ **Right**: "We need to scale customer service capabilities independently based on demand"
+
+❌ **Wrong**: "Implement REST APIs for all data access"
+✅ **Right**: "Enable real-time customer data access for support representatives"
+```
+
+### Missing Business Context
+```markdown
+❌ **Wrong**: "Build user management system"
+✅ **Right**: "Enable customer self-service to reduce support costs by 30%"
+
+❌ **Wrong**: "Create reporting dashboard"
+✅ **Right**: "Provide executives real-time visibility into key business metrics"
+```
+
+### Stakeholder Blindness
+```markdown
+❌ **Wrong**: "System should be fast and reliable"
+✅ **Right**: "Support representatives need <2 second response time to maintain customer satisfaction"
+
+❌ **Wrong**: "Make it user-friendly"
+✅ **Right**: "Enable non-technical staff to complete tasks without training"
+```
+
+## Implementation Guidelines
+
+### Business Architecture Workflow
+1. **Stakeholder Interview**: Understand business context and needs
+2. **Capability Modeling**: Map business functions to capabilities
+3. **Process Analysis**: Document critical business processes
+4. **Value Stream Design**: Map end-to-end value delivery
+5. **Technical Mapping**: Connect capabilities to system components
+6. **Validation Review**: Confirm with business stakeholders
+
+### Documentation Deliverables
+- **Stakeholder Analysis**: Who cares and why
+- **Business Capabilities**: What the business needs to do
+- **Business Processes**: How work gets done
+- **Value Streams**: How value flows to customers
+- **Capability-Component Map**: Bridge to technical architecture
+
+### Success Criteria
+- Business stakeholders confirm accuracy and completeness
+- Technical team understands business requirements
+- Clear traceability from business need to technical solution
+- Prioritization aligned with business value
+
+This rule ensures all architecture work starts with solid business foundation and maintains business alignment throughout technical design.
