@@ -30,6 +30,143 @@ The Enhanced Energy AI Optimizer (EAIO) system integrates the **Building Data Ge
 - **Real-Time Processing**: <3 minutes anomaly detection with BDG2 baselines
 - **Scalability Proven**: Architecture validated for 1,636+ building portfolio
 
+## 🏗️ Complete 6-Layer Architecture Diagram
+
+```mermaid
+graph TB
+    %% EAIO Complete 6-Layer Architecture
+    
+    subgraph Layer1 ["🖥️ Layer 1: User Interface Layer"]
+        direction TB
+        NextJS["Next.js Web App<br/>📊 Executive Dashboard<br/>📈 Manager Dashboard<br/>🔧 Analyst Dashboard"]
+        Streamlit["Streamlit Analytics<br/>📊 Deep Analytics<br/>🔍 BDG2 Exploration<br/>📈 Custom Reports"]
+        PWA["Progressive Web App<br/>📱 Mobile Interface<br/>🔔 Real-time Alerts<br/>⚡ Offline Capability"]
+        NextJS -.-> PWA
+        Streamlit -.-> PWA
+    end
+    
+    subgraph Layer2 ["🧠 Layer 2: Hybrid LLM Infrastructure"]
+        direction TB
+        HybridRouter["Hybrid LLM Router<br/>🔒 Privacy Classification<br/>💰 Cost Optimization<br/>🔄 Auto Fallback"]
+        
+        subgraph LocalLLM ["Local LLM Stack"]
+            Ollama["Ollama Runtime<br/>🏠 On-device Processing"]
+            Qwen["Qwen2.5-7B-Instruct<br/>🎯 Control & Safety"]
+            Llama["Llama-3.2-3B-Instruct<br/>⚡ Fast Coordination"]
+        end
+        
+        subgraph ExternalAPI ["External LLM APIs"]
+            OpenAI["OpenAI GPT-4o<br/>🧠 Complex Reasoning"]
+            DeepSeek["DeepSeek-V3<br/>💡 Optimization Strategy"]
+            Gemini["Google Gemini<br/>📊 Data Analysis"]
+        end
+        
+        HybridRouter --> LocalLLM
+        HybridRouter --> ExternalAPI
+    end
+    
+    subgraph Layer3 ["🔌 Layer 3: MCP Integration Layer ⭐ NEW"]
+        direction TB
+        
+        subgraph MCPServers ["MCP Server Ecosystem"]
+            EnergyMCP["Energy Data Server<br/>⚡ Consumption Data<br/>📊 Sensor Readings<br/>🚨 Anomaly Detection"]
+            WeatherMCP["Weather Server<br/>🌤️ Forecast Data<br/>📈 Historical Weather<br/>🌡️ Impact Analysis"]
+            MLMCP["ML Models Server<br/>🤖 Forecasting Models<br/>📊 Efficiency Calc<br/>💡 Optimization Rec"]
+            ControlMCP["Building Control Server<br/>🏢 HVAC Control<br/>💡 Lighting Optimization<br/>⚙️ Equipment Schedule"]
+            BDG2MCP["BDG2 Data Server<br/>🏢 Building Benchmarks<br/>📊 Performance Compare<br/>📈 Pattern Analysis"]
+        end
+        
+        MCPCache["MCP Tool Cache<br/>⚡ Redis Caching<br/>🎯 Category-based TTL<br/>📊 Performance Monitor"]
+        MCPServers --> MCPCache
+    end
+    
+    subgraph Layer4 ["🤖 Layer 4: Multi-Agent Framework ⭐ NEW"]
+        direction TB
+        
+        subgraph LangGraphCore ["LangGraph Orchestration"]
+            StateGraph["StateGraph Workflow<br/>🔄 State Management<br/>🛡️ Checkpointing<br/>↩️ Recovery Mechanism"]
+            WorkflowStates["Workflow States<br/>💬 Messages State<br/>🏢 Building Context<br/>📊 Analysis Results<br/>🧠 Memory Context"]
+        end
+        
+        subgraph AgentNetwork ["Agent Network"]
+            CoordAgent["Coordinator Agent<br/>🎯 Workflow Orchestration<br/>📋 Task Distribution<br/>🔄 Result Integration"]
+            DataAgent["Data Intelligence Agent<br/>📊 BDG2 Analysis<br/>🔍 Pattern Recognition<br/>📈 Historical Insights"]
+            OptAgent["Optimization Strategist<br/>💡 Strategy Development<br/>⚡ Energy Optimization<br/>💰 Cost Analysis"]
+            ForecastAgent["Forecast Intelligence<br/>📈 Predictive Modeling<br/>🌤️ Weather Integration<br/>📊 Trend Analysis"]
+            ControlAgent["Control Coordination<br/>🏢 System Control<br/>⚙️ Equipment Management<br/>🛡️ Safety Validation"]
+        end
+        
+        LangSmith["LangSmith Monitoring<br/>📊 Workflow Tracing<br/>💰 Cost Tracking<br/>⚡ Performance Metrics"]
+        
+        StateGraph --> AgentNetwork
+        AgentNetwork --> LangSmith
+    end
+    
+    subgraph Layer5 ["🧠 Layer 5: Memory Systems ⭐ NEW"]
+        direction TB
+        
+        subgraph MemoryLayers ["5-Layer Memory Architecture"]
+            ShortTerm["Short-term Memory<br/>💭 Redis Cache<br/>🔄 20 Exchanges<br/>⚡ Immediate Context"]
+            Working["Working Memory<br/>🧠 Redis Buffer<br/>📝 2000 Tokens<br/>🎯 Task Context"]
+            Episodic["Episodic Memory<br/>🏢 Milvus Vectors<br/>📊 Building Patterns<br/>💡 Experience Storage"]
+            Semantic["Semantic Memory<br/>📚 ChromaDB<br/>🎓 Domain Knowledge<br/>📊 BDG2 Benchmarks"]
+            Procedural["Procedural Memory<br/>⚙️ PostgreSQL<br/>🛠️ Agent Skills<br/>📋 Procedures"]
+        end
+        
+        MemoryManager["Memory Manager<br/>🔄 Consolidation Process<br/>🎯 Context Retrieval<br/>📊 Pattern Extraction"]
+        MemoryLayers --> MemoryManager
+    end
+    
+    subgraph Layer6 ["💾 Layer 6: Data Infrastructure Layer"]
+        direction TB
+        
+        subgraph PrimaryDB ["Primary Database"]
+            PostgreSQL["PostgreSQL 16<br/>🏢 Building Metadata<br/>👥 User Management<br/>🔐 Security Context"]
+            TimescaleDB["TimescaleDB Extension<br/>⚡ Energy Time-series<br/>📊 BDG2 Integration<br/>🚀 Optimized Queries"]
+        end
+        
+        subgraph VectorDB ["Vector Database"]
+            Milvus["Milvus Vector DB<br/>🔍 Similarity Search<br/>🧠 Agent Memory<br/>📊 Pattern Storage<br/>384D Embeddings"]
+        end
+        
+        subgraph CacheLayer ["Cache Layer"]
+            Redis["Redis Cache<br/>⚡ Session Storage<br/>🔄 Real-time Updates<br/>📊 Performance Cache"]
+        end
+        
+        PostgreSQL -.-> TimescaleDB
+    end
+    
+    %% Layer Connections
+    Layer1 --> Layer2
+    Layer2 --> Layer3
+    Layer3 --> Layer4
+    Layer4 --> Layer5
+    Layer5 --> Layer6
+    
+    %% Cross-layer Integrations
+    Layer4 -.-> Layer3
+    Layer5 -.-> Layer6
+    Layer1 -.-> Layer6
+    
+    %% Real-time Data Flows
+    Layer6 -.-> Layer5
+    Layer5 -.-> Layer4
+    Layer4 -.-> Layer3
+    Layer3 -.-> Layer2
+    Layer2 -.-> Layer1
+    
+    %% Styling
+    classDef layerStyle fill:#f9f9f9,stroke:#333,stroke-width:2px,color:#333
+    classDef newFeature fill:#e1f5fe,stroke:#0277bd,stroke-width:3px,color:#01579b
+    classDef coreComponent fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#e65100
+    classDef infrastructure fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#4a148c
+    
+    class Layer1,Layer2,Layer3,Layer4,Layer5,Layer6 layerStyle
+    class Layer3,Layer4,Layer5 newFeature
+    class NextJS,Streamlit,HybridRouter,StateGraph,MemoryManager coreComponent
+    class PostgreSQL,Milvus,Redis infrastructure 
+```
+
 ## 📊 Enhanced Performance Validation
 
 ### Real Data Performance Targets - Validated with BDG2
